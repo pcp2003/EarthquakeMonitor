@@ -1,1 +1,12 @@
 httpx>=0.25.0
+
+# Database dependencies
+asyncpg>=0.29.0
+sqlalchemy>=2.0.0
+alembic>=1.12.0
+
+# Optional: for connection pooling and advanced features
+psycopg2-binary>=2.9.0
+
+# Environment variables
+python-dotenv>=1.0.0

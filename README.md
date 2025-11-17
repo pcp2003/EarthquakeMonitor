@@ -39,9 +39,68 @@ docker/
 scripts/
 ```
 
+## Database Setup
+
+1. **Connect to PostgreSQL:**
+```bash
+psql postgres
+```
+
+2. **Create database and user:**
+```sql
+CREATE DATABASE earthquake_monitor;
+CREATE USER earthquake_user WITH PASSWORD 'your_password_here';
+GRANT ALL PRIVILEGES ON DATABASE earthquake_monitor TO earthquake_user;
+\q
+```
+
+3. **Set up environment variables:**
+```bash
+cp .env.example .env
+```
+
+4. **Edit `.env` file with your database credentials:**
+```env
+DATABASE_URL=postgresql+asyncpg://earthquake_user:your_password_here@localhost:5432/earthquake_monitor
+```
+
+### Database Access
+
+**Connect to the earthquake database:**
+```bash
+psql -h localhost -U earthquake_user -d earthquake_monitor
+```
+
+**Common PostgreSQL commands:**
+- `\l` - List all databases
+- `\dt` - List all tables
+- `\d table_name` - Describe table structure
+- `\q` - Quit psql
+
 ## Running the Project
 
+### Development Setup
+
+1. **Install dependencies:**
+```bash
+pip install -r requirements.txt
 ```
+
+2. **Set up database (see Database Setup section above)**
+
+3. **Run database migrations:**
+```bash
+alembic upgrade head
+```
+
+4. **Start the application:**
+```bash
+python src/main.py
+```
+
+### Docker Setup
+
+```bash
 docker-compose up --build
 ```
 
