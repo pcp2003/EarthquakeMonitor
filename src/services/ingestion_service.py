@@ -1,10 +1,10 @@
-from typing import List
+from __future__ import annotations
+
 import httpx
-import sys
-import os
 import logging
 from datetime import datetime, timedelta
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+from typing import List
+
 from config import USGS_URL
 
 class IngestionServiceError(Exception):
