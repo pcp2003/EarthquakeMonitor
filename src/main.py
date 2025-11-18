@@ -1,28 +1,17 @@
-from services.ingestion import fetch_earthquakes
+from services.ingestion_service import IngestionService
 from datetime import datetime, timedelta
 import asyncio
 
 async def main():
     
+    ingestion_service = IngestionService()
     since = datetime.utcnow() - timedelta(days=1)
-    data = await fetch_earthquakes(since)
-    for feature in data["features"]:
+    data = await ingestion_service.fetch_usgs_data(since)
 
-        props = feature["properties"]
-        geom = feature["geometry"]
+    for item in data:
+        print(item)
 
-        print(
-            feature["id"],
-            props["time"],
-            geom["coordinates"][1],
-            geom["coordinates"][0],
-            geom["coordinates"][2],
-            props["mag"],
-            props["magType"],
-            props["place"],
-        )
-
-    print("Retrieved Earthquakes:", len(data["features"]), "since", since.isoformat())
+    print("Retrieved Earthquakes:", len(data), "since", since.isoformat())
 
 if __name__ == "__main__":
 
