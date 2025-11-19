@@ -98,6 +98,38 @@ alembic upgrade head
 python src/main.py
 ```
 
+### Running with Docker
+
+1. **Ensure your `.env` file is properly configured:**
+```bash
+cp .env.example .env
+# Edit .env with your credentials
+```
+
+2. **Build and start all services:**
+```bash
+docker compose up -d
+```
+
+3. **View application logs:**
+```bash
+docker compose logs app -f
+```
+
+4. **Run database migrations (if needed):**
+```bash
+docker compose exec app alembic upgrade head
+```
+
+5. **Stop all services:**
+```bash
+docker compose down
+```
+
+**Docker services:**
+- **postgres** - PostgreSQL database (port 5432)
+- **app** - Python application
+
 ### Docker Setup
 
 ```bash

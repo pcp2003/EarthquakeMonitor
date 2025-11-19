@@ -17,8 +17,7 @@ USGS_URL = "https://earthquake.usgs.gov/fdsnws/event/1/query"
 # Database Configuration
 DATABASE_URL = os.getenv("DATABASE_URL")
 if not DATABASE_URL:
-    # Provide a fallback or None to ensure explicit configuration
-    DATABASE_URL = None  # This will force explicit configuration via .env
+    raise ValueError("DATABASE_URL must be configured in .env file")
 
 # Database Pool Configuration (Technical settings - not user configurable)
 DB_POOL_SIZE = 5           # Keep N active connections alive
