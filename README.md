@@ -8,9 +8,10 @@ This project retrieves earthquake events from the USGS API, stores them in a Pos
 
 ## Features
 
-* Automatic ingestion of earthquake data every 5 minutes
-* Manual ingestion endpoint for testing (`POST /api/v1/sync`)
-* REST API with pagination and filtering (`GET /api/v1/earthquakes`)
+* Automatic ingestion of earthquake data every 1 minuto (configurável via .env)
+* Manual data pull endpoint for testing (`POST /api/v1/earthquakes/pull`)
+* REST API with pagination and filtering (`GET /api/v1/earthquakes/list`)
+* Health check endpoint for monitoring (`GET /api/v1/health`)
 * PostgreSQL persistence using SQLAlchemy (Async)
 * Full Docker support
 * Unit and integration tests (Pytest)
@@ -133,7 +134,14 @@ docker compose down
 
 **Docker services:**
 - **postgres** - PostgreSQL database (port 5432)
-- **app** - Python application
+  - Health check: verifica conexão a cada 5s
+- **app** - Python application (port 8000)
+  - Health check: verifica `/api/v1/health` a cada 30s
+
+**Check container health:**
+```bash
+docker compose ps
+```
 
 ### Docker Setup
 
@@ -146,3 +154,51 @@ Once running, the API documentation is available at:
 ```
 http://localhost:8000/docs
 ```
+
+## API Endpoints
+
+### Health Check
+```bash
+GET /api/v1/health
+```
+Checks API and database health status, returns total earthquakes and last sync time.
+
+**Example response:**
+```json
+{
+  "status": "healthy",
+  "database": {
+    "status": "connected",
+    "total_earthquakes": 1852,
+    "last_event_time": "2025-11-19T14:30:00"
+  },
+  "message": "Earthquake Monitor API is running normally"
+}
+```
+
+### List Earthquakes
+```bash
+GET /api/v1/earthquakes/list?page=1&limit=20&min_magnitude=5.0
+```
+Returns paginated list with optional filters:
+- `min_magnitude` / `max_magnitude`
+- `min_depth` / `max_depth`
+- `start_time` / `end_time` (ISO 8601 format)
+- `magnitude_type` (mb, ml, mw, etc)
+- `place_contains` (text search)
+
+### Get Earthquake Details
+```bash
+GET /api/v1/earthquakes/{id}/details
+```
+Returns detailed information about a specific earthquake.
+
+### Manual Data Pull
+```bash
+POST /api/v1/earthquakes/pull
+{
+  "since_hours": 24,
+  "limit": 1000
+}
+```
+Manually pulls earthquake data from USGS API and stores in database.

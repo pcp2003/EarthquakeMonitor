@@ -5,7 +5,7 @@ def test_get_earthquake_by_id(override_dependency, api_mock_repository, mock_ear
     api_mock_repository.get_by_id.return_value = mock_earthquake
     
     # Execute
-    response = client.get("/api/v1/earthquakes/test_id")
+    response = client.get("/api/v1/earthquakes/test_id/details")
     
     # Verify
     assert response.status_code == 200
@@ -13,7 +13,7 @@ def test_get_earthquake_by_id(override_dependency, api_mock_repository, mock_ear
 
 def test_get_earthquake_not_found(override_dependency, api_mock_repository, client):
     api_mock_repository.get_by_id.return_value = None
-    response = client.get("/api/v1/earthquakes/nonexistent")
+    response = client.get("/api/v1/earthquakes/nonexistent/details")
     assert response.status_code == 404
 
 def test_list_earthquakes(override_dependency, api_mock_repository, mock_earthquake, client):
@@ -21,7 +21,7 @@ def test_list_earthquakes(override_dependency, api_mock_repository, mock_earthqu
     api_mock_repository.get_filtered.return_value = ([mock_earthquake], 1)
     
     # Execute
-    response = client.get("/api/v1/earthquakes?page=1&limit=10")
+    response = client.get("/api/v1/earthquakes/list?page=1&limit=10")
     
     # Verify
     assert response.status_code == 200

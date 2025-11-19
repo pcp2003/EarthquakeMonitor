@@ -106,3 +106,12 @@ class EarthquakeRepository:
         query = select(func.max(Earthquake.time))
         result = await self.session.execute(query)
         return result.scalar_one_or_none()
+
+    async def get_total_count(self) -> int:
+        """
+        Get the total number of earthquakes in the database.
+        Used for health checks and statistics.
+        """
+        query = select(func.count(Earthquake.id))
+        result = await self.session.execute(query)
+        return result.scalar_one()

@@ -37,6 +37,12 @@ services:
       - ./migrations:/app/migrations
       - ./tests:/app/tests
       - ./scripts:/app/scripts
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     networks:
       - earthquake_network
 

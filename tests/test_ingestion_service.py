@@ -39,7 +39,7 @@ class TestIngestionService:
         result = await service._format_usgs_records(mock_data)
         
         assert len(result) == 1
-        assert result[0]["external_id"] == "test123"
+        assert result[0]["id"] == "test123"
         assert result[0]["magnitude"] == 4.5
         assert result[0]["place"] == "Test Location"
         assert result[0]["latitude"] == 37.0

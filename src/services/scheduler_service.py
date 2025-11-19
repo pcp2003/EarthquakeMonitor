@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.interval import IntervalTrigger
-
+import os
 from database.connection import db_manager
 from repository.earthquake_repository import EarthquakeRepository
 from services.ingestion_service import IngestionService
@@ -53,18 +53,19 @@ class SchedulerService:
         """
         Start the scheduler and add the sync job.
         """
+
+        interval_minutes = int(os.getenv("SYNC_INTERVAL_MINUTES", "1"))
         self.scheduler.add_job(
             self._run_sync_job,
-            trigger=IntervalTrigger(minutes=5),
+            trigger=IntervalTrigger(minutes=interval_minutes),
             id="sync_earthquakes",
-            name="Sync earthquakes every 5 minutes",
+            name=f"Sync earthquakes every {interval_minutes} minute(s)",
             replace_existing=True,
             coalesce=True,
             max_instances=1
         )
-        
         self.scheduler.start()
-        logger.info("Scheduler started with 5-minute interval sync job.")
+        logger.info(f"Scheduler started with {interval_minutes}-minute interval sync job.")
 
     def shutdown(self):
         """
