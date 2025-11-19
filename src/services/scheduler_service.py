@@ -1,0 +1,78 @@
+from __future__ import annotations
+
+import logging
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.triggers.interval import IntervalTrigger
+
+from database.connection import db_manager
+from repository.earthquake_repository import EarthquakeRepository
+from services.ingestion_service import IngestionService
+from services.sync_service import EarthquakeSyncService
+
+logger = logging.getLogger(__name__)
+
+class SchedulerService:
+    """
+    Service responsible for managing background tasks.
+    Uses APScheduler to run periodic synchronization jobs.
+    """
+
+    def __init__(self):
+        self.scheduler = AsyncIOScheduler()
+
+    async def _run_sync_job(self):
+        """
+        Internal job to execute the synchronization logic.
+        Manages the database session lifecycle for the background task.
+        """
+        logger.info("Starting scheduled earthquake synchronization...")
+        
+        # We need to manually manage the session scope here since we are not in a request context
+        try:
+            # Using the generator as a context manager equivalent by iterating once
+            async for session in db_manager.get_session():
+                try:
+                    repository = EarthquakeRepository(session)
+                    ingestion_service = IngestionService()
+                    sync_service = EarthquakeSyncService(repository, ingestion_service)
+                    
+                    result = await sync_service.sync_earthquakes()
+                    
+                    if result.success:
+                        logger.info(f"Scheduled sync completed: {result.records_inserted} new records.")
+                    else:
+                        logger.warning(f"Scheduled sync finished with issues: {result.message}")
+                        
+                except Exception as e:
+                    logger.error(f"Error inside sync job execution: {e}", exc_info=True)
+                finally:
+                    # Break after one iteration as get_session yields only once
+                    break
+                    
+        except Exception as e:
+            logger.error(f"Failed to acquire database session for scheduler: {e}", exc_info=True)
+
+    def start(self):
+        """
+        Start the scheduler and add the sync job.
+        """
+        # Add the job to run every 5 minutes
+        self.scheduler.add_job(
+            self._run_sync_job,
+            trigger=IntervalTrigger(minutes=5),
+            id="sync_earthquakes",
+            name="Sync earthquakes every 5 minutes",
+            replace_existing=True,
+            coalesce=True,  # Don't stack up jobs if one takes too long
+            max_instances=1
+        )
+        
+        self.scheduler.start()
+        logger.info("Scheduler started with 5-minute interval sync job.")
+
+    def shutdown(self):
+        """
+        Shutdown the scheduler.
+        """
+        self.scheduler.shutdown()
+        logger.info("Scheduler shut down.")

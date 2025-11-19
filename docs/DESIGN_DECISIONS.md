@@ -4,11 +4,11 @@ This document summarizes the key design decisions taken for the project, written
 
 The ingestion mechanism was designed with two access modes: a manual endpoint and an automatic background task. The manual endpoint allows quick testing during development, while the periodic scheduler handles the continuous synchronization of new earthquake data. Using a shared internal ingestion service avoids duplication and keeps the logic consistent.
 
-For real-time updates, a simple polling strategy was selected with a fixed interval of ten seconds. This approach keeps the system easy to reason about, avoids unnecessary architectural complexity, and works reliably in local and containerized environments.
+For real-time updates, a polling strategy was selected with a fixed interval of 5 minutes. This decision was based on a statistical analysis of USGS data from the previous week, performed using the `scripts/calculate_frequency.py` utility. The analysis showed a total of 1,852 earthquakes, resulting in an average interval of approximately 5.44 minutes (326 seconds) between events. Setting the scheduler to 5 minutes aligns with the natural frequency of seismic events, ensuring the system remains up-to-date without making excessive requests to the external API or overloading the local database with empty checks. This approach balances data freshness with resource efficiency.
 
 To detect new earthquake events, the system tracks the timestamp of the last successful synchronization. This timestamp is passed directly to the USGS API, allowing the system to fetch only new events. This helps reduce the amount of data transferred and ensures that ingestion remains efficient.
 
-Data duplication is prevented at the database level using PostgreSQL’s `ON CONFLICT DO NOTHING` mechanism. Each earthquake includes a unique identifier supplied by USGS, and since earthquake records are not updated after publication, it is safe to insert data in an idempotent way without worrying about overwriting existing entries.
+Data duplication is prevented at the database level using PostgreSQL’s `ON CONFLICT DO NOTHING` mechanism. Each earthquake includes a unique identifier, and since earthquake records are not updated after publication, it is safe to insert data in an idempotent way without worrying about overwriting existing entries.
 
 The database schema includes only the fields necessary to represent the events from USGS: identifiers, timestamps, coordinates, depth, magnitude, magnitude type, and a human-readable place description. An automatic creation timestamp is included to support internal auditing. Indexes were created on commonly queried fields such as time, magnitude, and geographical coordinates.
 
