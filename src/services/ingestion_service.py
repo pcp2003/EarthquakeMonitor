@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import httpx
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import List
 
 from config import USGS_URL
@@ -26,7 +26,10 @@ class IngestionService:
             raise IngestionServiceError("The 'since' parameter must be of type datetime")
         
         # USGS API specific validation (data futura não faz sentido para terremotos)
-        if since > datetime.utcnow():
+        # Ensure comparison is timezone-aware if 'since' is aware
+        now = datetime.now(timezone.utc) if since.tzinfo else datetime.utcnow()
+        
+        if since > now:
             raise IngestionServiceError("Cannot fetch earthquake data from the future - USGS API limitation")
         
         # Schema já valida limit, não precisa revalidar aqui
@@ -74,7 +77,7 @@ class IngestionService:
                         magnitude = float(magnitude)
                     
                     formatted.append({
-                        "external_id": str(feature["id"]),
+                        "id": str(feature["id"]),
                         "time": earthquake_time,
                         "latitude": latitude,
                         "longitude": longitude,
@@ -96,4 +99,4 @@ class IngestionService:
         except Exception as e:
             self.logger.error(f"Error in data formatting: {str(e)}")
             raise IngestionServiceError(f"Error in data formatting: {str(e)}") from e
-    
+

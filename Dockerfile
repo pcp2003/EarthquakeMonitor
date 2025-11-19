@@ -20,8 +20,8 @@ COPY src/ ./src/
 COPY migrations/ ./migrations/
 COPY alembic.ini .
 
-# Expose port (if you add an API later)
+# Expose port
 EXPOSE 8000
 
-# Command to keep container running (allows exec commands)
-CMD ["sleep", "infinity"]
+# Command to run the application
+CMD ["python", "src/main.py"]

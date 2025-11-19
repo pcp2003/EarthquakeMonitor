@@ -6,37 +6,39 @@ This project retrieves earthquake events from the USGS API, stores them in a Pos
 
 ## Features
 
-* Automatic ingestion of earthquake data every 10 seconds
-* Manual ingestion endpoint for testing
-* REST API with pagination and filtering
-* PostgreSQL persistence using SQLAlchemy
+* Automatic ingestion of earthquake data every 10 seconds (In Progress)
+* Manual ingestion endpoint for testing (`POST /api/v1/sync`)
+* REST API with pagination and filtering (`GET /api/v1/earthquakes`)
+* PostgreSQL persistence using SQLAlchemy (Async)
 * Full Docker support
-* Unit and integration tests
+* Unit and integration tests (Pytest)
 
 ## Technologies
 
 * Python 3.11
 * FastAPI
-* SQLAlchemy 2.0
+* SQLAlchemy 2.0 (Async)
 * PostgreSQL
-* APScheduler
+* APScheduler (Planned)
 * Docker and docker-compose
+* Pydantic v2
 
-## Project Structure (simplified)
+## Project Structure
 
 ```
 src/
-  main.py
-  api/
-  models/
-  schemas/
-  services/
-  database/
-  utils/
+  api/          # API Routes and dependencies
+  database/     # Database connection and session management
+  models/       # SQLAlchemy ORM models
+  repository/   # Data access layer
+  schemas/      # Pydantic schemas for validation
+  services/     # Business logic (Ingestion, Sync)
+  main.py       # Application entry point
+  config.py     # Configuration settings
 
-tests/
-docker/
-scripts/
+tests/          # Unit and integration tests
+docker/         # Docker configuration files
+migrations/     # Alembic migrations
 ```
 
 ## Database Setup
