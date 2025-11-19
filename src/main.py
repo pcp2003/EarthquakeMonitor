@@ -13,7 +13,6 @@ from services.scheduler_service import SchedulerService
 
 logger = logging.getLogger(__name__)
 
-# Global scheduler instance
 scheduler = SchedulerService()
 
 @asynccontextmanager
@@ -22,15 +21,11 @@ async def lifespan(app: FastAPI):
     Handle application startup and shutdown events.
     """
     logger.info("Starting Earthquake Monitor API...")
-    
-    # Start Scheduler
     scheduler.start()
     
     yield
     
     logger.info("Shutting down Earthquake Monitor API...")
-    
-    # Shutdown Scheduler
     scheduler.shutdown()
     
     await db_manager.close()

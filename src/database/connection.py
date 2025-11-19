@@ -17,20 +17,16 @@ class DatabaseManager:
         if not self.database_url:
             raise ValueError("DATABASE_URL must be configured in config.py")
         
-        # Create async engine with connection pooling
         self.engine = create_async_engine(
             self.database_url,
-            # Connection pooling settings
-            pool_size=DB_POOL_SIZE,         # Keeps N active connections alive
-            max_overflow=DB_MAX_OVERFLOW,   # Extra connections when needed
-            pool_timeout=DB_POOL_TIMEOUT,   # Timeout to acquire connection
-            pool_recycle=DB_POOL_RECYCLE,   # Recreate connections periodically
-            pool_pre_ping=True,             # Test connection before using
-            echo=DB_ECHO,                   # Log SQL queries (configurable)
-            future=True                     # SQLAlchemy 2.0 mode
+            pool_size=DB_POOL_SIZE,
+            max_overflow=DB_MAX_OVERFLOW,n            pool_timeout=DB_POOL_TIMEOUT,
+            pool_recycle=DB_POOL_RECYCLE,
+            pool_pre_ping=True,
+            echo=DB_ECHO,
+            future=True
         )
         
-        # Create session factory
         self.async_session = async_sessionmaker(
             bind=self.engine,
             class_=AsyncSession,
@@ -59,5 +55,4 @@ class DatabaseManager:
         await self.engine.dispose()
         logger.info("Database engine closed")
 
-# Global database manager instance
 db_manager = DatabaseManager()

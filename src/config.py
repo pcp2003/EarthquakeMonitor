@@ -19,12 +19,11 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 if not DATABASE_URL:
     raise ValueError("DATABASE_URL must be configured in .env file")
 
-# Database Pool Configuration (Technical settings - not user configurable)
-DB_POOL_SIZE = 5           # Keep N active connections alive
-DB_MAX_OVERFLOW = 10       # Extra connections when pool is full
-DB_POOL_TIMEOUT = 30       # Seconds to wait for connection
-DB_POOL_RECYCLE = 3600     # Recreate connections after 1 hour
-DB_ECHO = False            # SQL query logging (change to True for development debugging)
+DB_POOL_SIZE = 5
+DB_MAX_OVERFLOW = 10
+DB_POOL_TIMEOUT = 30
+DB_POOL_RECYCLE = 3600
+DB_ECHO = False
 
 # Logging configuration
 logging.basicConfig(

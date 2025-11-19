@@ -12,10 +12,7 @@ from .base import Base
 class Earthquake(Base):
     __tablename__ = "earthquakes"
     
-    # Primary key - USGS external ID
     id = Column(String(50), primary_key=True, comment="USGS unique identifier")
-    
-    # Earthquake event data
     time = Column(TIMESTAMP(timezone=False), nullable=False, comment="Earthquake occurrence time (UTC)")
     latitude = Column(DECIMAL(9, 6), nullable=False, comment="Latitude coordinate (-90 to 90)")
     longitude = Column(DECIMAL(9, 6), nullable=False, comment="Longitude coordinate (-180 to 180)")
@@ -24,7 +21,6 @@ class Earthquake(Base):
     magnitude_type = Column(String(10), nullable=True, comment="Magnitude type (mb, ml, mw, etc)")
     place = Column(Text, nullable=True, comment="Location description")
     
-    # Metadata
     created_at = Column(
         TIMESTAMP(timezone=False), 
         nullable=False, 
@@ -32,7 +28,6 @@ class Earthquake(Base):
         comment="Record insertion timestamp"
     )
     
-    # Indexes for query optimization
     __table_args__ = (
         Index('idx_earthquakes_time', 'time'),
         Index('idx_earthquakes_magnitude', 'magnitude'),

@@ -61,9 +61,6 @@ class TestEarthquakeRepository:
         # Execute
         await repository.get_filtered(filters, pagination)
         
-        # Verify
-        # We can't easily check the generated SQL string with mocks, 
-        # but we can verify execute was called
         assert mock_session.execute.call_count == 2
 
     @pytest.mark.asyncio

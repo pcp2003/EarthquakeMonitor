@@ -20,8 +20,6 @@ The API exposes a minimal but complete set of endpoints: one for listing earthqu
 
 The application lifecycle is managed using FastAPI's lifespan context manager, ensuring that the background scheduler starts automatically with the application and shuts down cleanly, along with proper database connection cleanup.
 
-Session management uses FastAPI's dependency injection for HTTP requests, while background tasks manage sessions manually using async context patterns, maintaining consistent safety guarantees in both scenarios.
-
 Error handling and validation are distributed across multiple layers. Pydantic schemas validate input structure at the API boundary, the ingestion service handles business logic validations, and the repository manages database constraints. When processing bulk data, individual record failures are logged and skipped rather than failing the entire batch.
 
 Configuration is centralized in `config.py`, loading values from `.env` files. Critical settings like `DATABASE_URL` are validated at startup to fail fast if misconfigured.

@@ -201,7 +201,7 @@ class DataSyncRequest(BaseModel):
     since_hours: int = Field(
         default=24,
         ge=1,
-        le=168,  # 1 week max
+        le=168,
         description="Hours back from now to fetch data (max 1 week)"
     )
     limit: int = Field(

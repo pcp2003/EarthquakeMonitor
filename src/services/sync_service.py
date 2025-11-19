@@ -31,7 +31,6 @@ class EarthquakeSyncService:
         """
         start_time = datetime.now(timezone.utc)
         
-        # Determine the 'since' time
         if request:
             since = start_time - timedelta(hours=request.since_hours)
             limit = request.limit
@@ -39,23 +38,18 @@ class EarthquakeSyncService:
         else:
             last_event_time = await self.repository.get_last_event_time()
             if last_event_time:
-                # Add a small buffer (e.g., 1 minute) to ensure we don't miss anything due to clock skew
-                # But since we use idempotent insert, overlapping is fine.
                 since = last_event_time
                 logger.info(f"Auto sync: Last event was at {last_event_time}. Fetching new data since then.")
             else:
-                # Default to 24 hours if DB is empty
                 since = start_time - timedelta(hours=24)
                 logger.info("Auto sync: Database is empty. Fetching data from last 24 hours.")
             
-            limit = 20000 # Max limit for auto sync
+            limit = 20000
 
         try:
-            # 1. Fetch data from USGS
             earthquakes_data = await self.ingestion_service.fetch_usgs_data(since, limit)
             records_processed = len(earthquakes_data)
             
-            # 2. Save to Database
             records_inserted = await self.repository.bulk_insert(earthquakes_data)
             
             end_time = datetime.now(timezone.utc)

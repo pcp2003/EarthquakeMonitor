@@ -41,7 +41,6 @@ class EarthquakeRepository:
         """
         query = select(Earthquake)
         
-        # Apply filters dynamically
         if filters.min_magnitude is not None:
             query = query.where(Earthquake.magnitude >= filters.min_magnitude)
         
@@ -64,16 +63,12 @@ class EarthquakeRepository:
             query = query.where(Earthquake.magnitude_type == filters.magnitude_type)
             
         if filters.place_contains is not None:
-            # Case-insensitive search
             query = query.where(Earthquake.place.ilike(f"%{filters.place_contains}%"))
 
-        # Count total matching records (before pagination)
-        # Optimization: select(func.count()).select_from(query.subquery())
         count_query = select(func.count()).select_from(query.subquery())
         total_result = await self.session.execute(count_query)
         total = total_result.scalar_one()
 
-        # Apply sorting (default: newest first) and pagination
         query = query.order_by(desc(Earthquake.time))
         query = query.limit(pagination.limit).offset(pagination.offset)
 
@@ -92,8 +87,6 @@ class EarthquakeRepository:
             return 0
 
         stmt = insert(Earthquake).values(earthquakes_data)
-        
-        # Idempotent insertion: ignore if ID already exists
         stmt = stmt.on_conflict_do_nothing(index_elements=['id'])
         
         result = await self.session.execute(stmt)
