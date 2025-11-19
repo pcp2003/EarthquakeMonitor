@@ -21,12 +21,15 @@ class IngestionService:
 
     async def fetch_usgs_data(self, since: datetime, limit: int = 1000) -> List[dict]:
         
+        # Type safety validation (não coberta pelo schema quando chamado diretamente)
         if not isinstance(since, datetime):
             raise IngestionServiceError("The 'since' parameter must be of type datetime")
+        
+        # USGS API specific validation (data futura não faz sentido para terremotos)
         if since > datetime.utcnow():
-            raise IngestionServiceError("The start date cannot be in the future")
-        if not isinstance(limit, int) or limit <= 0 or limit > 20000:
-            raise IngestionServiceError("The limit must be an integer between 1 and 20000")
+            raise IngestionServiceError("Cannot fetch earthquake data from the future - USGS API limitation")
+        
+        # Schema já valida limit, não precisa revalidar aqui
 
         params = {
             "format": "geojson",

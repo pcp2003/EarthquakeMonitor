@@ -57,5 +57,5 @@ class TestIngestionService:
         service = IngestionService()
         future_date = datetime.utcnow() + timedelta(days=1)
         
-        with pytest.raises(IngestionServiceError, match="start date cannot be in the future"):
+        with pytest.raises(IngestionServiceError, match="Cannot fetch earthquake data from the future"):
             await service.fetch_usgs_data(future_date)
