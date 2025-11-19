@@ -16,6 +16,14 @@ The system uses asynchronous database connections through SQLAlchemy's async eng
 
 Database schema management uses Alembic for migrations, even though the current project only has a single table. This choice prioritizes version control and safety for future changes. Alembic provides a clear history of schema modifications, making it easier to track when and why changes were made. More importantly, it ensures that any future schema modifications can be applied safely with rollback capabilities if something goes wrong. While it might seem like overhead for a simple single-table project, this foundation makes the system more maintainable and reduces risks when the application needs to evolve.
 
-The API exposes a minimal but complete set of endpoints: one for listing earthquakes with filtering capabilities, one for retrieving details of a single event, one for manually triggering ingestion, and one for health checking. This set keeps the service simple while covering all essential functionalities.
+The API exposes a minimal but complete set of endpoints: one for listing earthquakes with filtering capabilities, one for retrieving details of a single event, one for manually triggering ingestion. This set keeps the service simple while covering all essential functionalities.
 
-Finally, the project structure follows a modular layout, separating concerns between API routes, database models, business logic services, configuration, and utilities. This organization improves maintainability, supports testing more effectively, and aligns with common patterns used in FastAPI and modern backend applications.
+The application lifecycle is managed using FastAPI's lifespan context manager, ensuring that the background scheduler starts automatically with the application and shuts down cleanly, along with proper database connection cleanup.
+
+Session management uses FastAPI's dependency injection for HTTP requests, while background tasks manage sessions manually using async context patterns, maintaining consistent safety guarantees in both scenarios.
+
+Error handling and validation are distributed across multiple layers. Pydantic schemas validate input structure at the API boundary, the ingestion service handles business logic validations, and the repository manages database constraints. When processing bulk data, individual record failures are logged and skipped rather than failing the entire batch.
+
+Configuration is centralized in `config.py`, loading values from `.env` files. Critical settings like `DATABASE_URL` are validated at startup to fail fast if misconfigured.
+
+Finally, the project structure follows a modular layout, separating concerns between API routes, database models, business logic services, and configuration. This organization improves maintainability, supports testing more effectively, and aligns with common patterns used in FastAPI and modern backend applications.

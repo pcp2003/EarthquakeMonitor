@@ -27,15 +27,12 @@ class EarthquakeBase(BaseModel):
         description="Longitude coordinate (-180 to 180)"
     )
     depth: Optional[float] = Field(
-        None, 
-        ge=0.0,
-        description="Depth in kilometers"
+        None,
+        description="Depth in kilometers (can be negative for very shallow events)"
     )
     magnitude: Optional[float] = Field(
-        None, 
-        ge=0.0, 
-        le=10.0,
-        description="Earthquake magnitude"
+        None,
+        description="Earthquake magnitude (can be negative for very weak seismic events)"
     )
     magnitude_type: Optional[str] = Field(
         None, 

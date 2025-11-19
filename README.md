@@ -4,9 +4,11 @@ Backend system for collecting, storing and exposing earthquake data from the USG
 
 This project retrieves earthquake events from the USGS API, stores them in a PostgreSQL database, and exposes them through a REST API built with FastAPI. A background scheduler periodically synchronizes new events, simulating real-time updates.
 
+> **For detailed information about architectural and design decisions, see [docs/DESIGN_DECISIONS.md](docs/DESIGN_DECISIONS.md)**
+
 ## Features
 
-* Automatic ingestion of earthquake data every 10 seconds (In Progress)
+* Automatic ingestion of earthquake data every 5 minutes
 * Manual ingestion endpoint for testing (`POST /api/v1/sync`)
 * REST API with pagination and filtering (`GET /api/v1/earthquakes`)
 * PostgreSQL persistence using SQLAlchemy (Async)
@@ -19,7 +21,7 @@ This project retrieves earthquake events from the USGS API, stores them in a Pos
 * FastAPI
 * SQLAlchemy 2.0 (Async)
 * PostgreSQL
-* APScheduler (Planned)
+* APScheduler
 * Docker and docker-compose
 * Pydantic v2
 
@@ -32,13 +34,14 @@ src/
   models/       # SQLAlchemy ORM models
   repository/   # Data access layer
   schemas/      # Pydantic schemas for validation
-  services/     # Business logic (Ingestion, Sync)
+  services/     # Business logic (Ingestion, Sync, Scheduler)
   main.py       # Application entry point
   config.py     # Configuration settings
 
 tests/          # Unit and integration tests
-docker/         # Docker configuration files
 migrations/     # Alembic migrations
+scripts/        # Utility scripts
+docs/           # Project documentation
 ```
 
 ## Database Setup
