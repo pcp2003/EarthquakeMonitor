@@ -12,3 +12,14 @@ def setup_logging():
     logging.disable(logging.CRITICAL)
     yield
     logging.disable(logging.NOTSET)
+
+@pytest.fixture
+def mock_session():
+    from unittest.mock import AsyncMock
+    from sqlalchemy.ext.asyncio import AsyncSession
+    return AsyncMock(spec=AsyncSession)
+
+@pytest.fixture
+def repository(mock_session):
+    from repository.earthquake_repository import EarthquakeRepository
+    return EarthquakeRepository(mock_session)
