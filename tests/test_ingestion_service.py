@@ -4,7 +4,7 @@ import os
 from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, patch
 
-from services.ingestion_service import IngestionService, IngestionServiceError
+from services.ingestion_service import IngestionService
 
 
 class TestIngestionService:
@@ -49,7 +49,7 @@ class TestIngestionService:
     async def test_fetch_usgs_data_invalid_since(self):
         service = IngestionService()
         
-        with pytest.raises(IngestionServiceError, match="'since' parameter must be of type datetime"):
+        with pytest.raises(TypeError, match="'since' parameter must be of type datetime"):
             await service.fetch_usgs_data("invalid")
     
     @pytest.mark.asyncio
@@ -57,5 +57,5 @@ class TestIngestionService:
         service = IngestionService()
         future_date = datetime.utcnow() + timedelta(days=1)
         
-        with pytest.raises(IngestionServiceError, match="Cannot fetch earthquake data from the future"):
+        with pytest.raises(ValueError, match="Cannot fetch earthquake data from the future"):
             await service.fetch_usgs_data(future_date)

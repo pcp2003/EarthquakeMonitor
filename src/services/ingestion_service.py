@@ -1,33 +1,28 @@
 from __future__ import annotations
-
 import httpx
 import logging
 from datetime import datetime, timedelta, timezone
 from typing import List
-
 from config import USGS_URL
-
-class IngestionServiceError(Exception):
-    pass
 
 class IngestionService:
 
     def __init__(self):
         self.usgs_url = USGS_URL
         if not self.usgs_url:
-            raise IngestionServiceError("USGS API URL must be configured")
+            raise ValueError("USGS API URL must be configured")
         self.logger = logging.getLogger(__name__)
         self.logger.info(f"Ingestion service initialized with URL: {self.usgs_url}")
 
-    async def fetch_usgs_data(self, since: datetime, limit: int = 1000) -> List[dict]:
+    async def fetch_usgs_data(self, since: datetime, limit: int = 10000) -> List[dict]:
         
         if not isinstance(since, datetime):
-            raise IngestionServiceError("The 'since' parameter must be of type datetime")
+            raise TypeError("The 'since' parameter must be of type datetime")
         
         now = datetime.now(timezone.utc) if since.tzinfo else datetime.utcnow()
         
         if since > now:
-            raise IngestionServiceError("Cannot fetch earthquake data from the future - USGS API limitation")
+            raise ValueError("Cannot fetch earthquake data from the future - USGS API limitation")
 
         params = {
             "format": "geojson",
@@ -44,11 +39,13 @@ class IngestionService:
                 response.raise_for_status()
                 data = response.json()
             if not isinstance(data, dict) or "features" not in data:
-                raise IngestionServiceError("USGS API response in invalid format")
+                raise ValueError("USGS API response in invalid format")
             return await self._format_usgs_records(data)
+        except ValueError:
+            raise
         except Exception as e:
             self.logger.error(f"Error fetching USGS data: {str(e)}")
-            raise IngestionServiceError(f"Error fetching data: {str(e)}") from e
+            raise RuntimeError(f"Error fetching data: {str(e)}") from e
         
         
     async def _format_usgs_records(self, data: dict) -> List[dict]:
@@ -93,5 +90,4 @@ class IngestionService:
             
         except Exception as e:
             self.logger.error(f"Error in data formatting: {str(e)}")
-            raise IngestionServiceError(f"Error in data formatting: {str(e)}") from e
-
+            raise ValueError(f"Error in data formatting: {str(e)}") from e

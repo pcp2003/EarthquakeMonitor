@@ -14,7 +14,8 @@ load_dotenv()
 # USGS API Configuration
 USGS_URL = "https://earthquake.usgs.gov/fdsnws/event/1/query"
 
-# Database Configuration
+# Scheduler Configuration
+SYNC_INTERVAL_MINUTES = 1
 DATABASE_URL = os.getenv("DATABASE_URL")
 if not DATABASE_URL:
     raise ValueError("DATABASE_URL must be configured in .env file")

@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.interval import IntervalTrigger
-import os
+from config import SYNC_INTERVAL_MINUTES
 from database.connection import db_manager
 from repository.earthquake_repository import EarthquakeRepository
 from services.ingestion_service import IngestionService
@@ -18,6 +18,7 @@ class SchedulerService:
     """
 
     def __init__(self):
+
         self.scheduler = AsyncIOScheduler()
 
     async def _run_sync_job(self):
@@ -54,18 +55,17 @@ class SchedulerService:
         Start the scheduler and add the sync job.
         """
 
-        interval_minutes = int(os.getenv("SYNC_INTERVAL_MINUTES", "1"))
         self.scheduler.add_job(
             self._run_sync_job,
-            trigger=IntervalTrigger(minutes=interval_minutes),
+            trigger=IntervalTrigger(minutes=SYNC_INTERVAL_MINUTES),
             id="sync_earthquakes",
-            name=f"Sync earthquakes every {interval_minutes} minute(s)",
+            name=f"Sync earthquakes every {SYNC_INTERVAL_MINUTES} minute(s)",
             replace_existing=True,
             coalesce=True,
             max_instances=1
         )
         self.scheduler.start()
-        logger.info(f"Scheduler started with {interval_minutes}-minute interval sync job.")
+        logger.info(f"Scheduler started with {SYNC_INTERVAL_MINUTES}-minute interval sync job.")
 
     def shutdown(self):
         """
