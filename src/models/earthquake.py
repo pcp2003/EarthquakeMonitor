@@ -5,6 +5,7 @@ from typing import Optional
 
 from sqlalchemy import Column, String, TIMESTAMP, DECIMAL, Text, Index
 from sqlalchemy.sql import func
+from sqlalchemy.dialects.postgresql import TEXT
 
 from .base import Base
 
@@ -30,8 +31,7 @@ class Earthquake(Base):
     
     __table_args__ = (
         Index('idx_earthquakes_time', 'time'),
-        Index('idx_earthquakes_magnitude', 'magnitude'),
-        Index('idx_earthquakes_location', 'latitude', 'longitude'),
+        Index('idx_earthquakes_place_gin', 'place', postgresql_using='gin'),
     )
     
     def __repr__(self) -> str:

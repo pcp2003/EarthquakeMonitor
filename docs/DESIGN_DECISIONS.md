@@ -12,7 +12,13 @@ To detect new earthquake events, the system tracks the timestamp of the last suc
 
 Data duplication is prevented at the database level using PostgreSQL’s `ON CONFLICT DO NOTHING` mechanism. Each earthquake includes a unique identifier, and since earthquake records are not updated after publication, it is safe to insert data in an idempotent way without worrying about overwriting existing entries.
 
-The database schema includes only the fields necessary to represent the events from USGS: identifiers, timestamps, coordinates, depth, magnitude, magnitude type, and a human-readable place description. An automatic creation timestamp is included to support internal auditing. Indexes were created on commonly queried fields such as time, magnitude, and geographical coordinates.
+The database schema includes only the fields necessary to represent the events from USGS: identifiers, timestamps, coordinates, depth, magnitude, magnitude type, and a human-readable place description. An automatic creation timestamp is included to support internal auditing.
+
+**Index Strategy:** Two optimized indexes were created based on actual query patterns:
+- **`idx_earthquakes_time` (BTREE)**: Supports time-range filters (`start_time`, `end_time`) and the `ORDER BY time` clause in list queries. This is the most frequently used index for fetching recent earthquakes and historical data lookups.
+- **`idx_earthquakes_place_gin` (GIN)**: Uses PostgreSQL's Generalized Inverted Index for efficient full-text search on the `place` field. This optimizes the `LIKE '%place_contains%'` queries, enabling fast text matching without table scans. GIN indexes are ideal for text search operations despite slightly higher insertion overhead.
+
+This index configuration was chosen after evaluating several strategies. Previous indexes on `magnitude` and `geographical coordinates` (latitude/longitude) were removed as they were either rarely used in isolation or never queried. The current setup provides optimal performance for the two most common query patterns: temporal filtering and location text search, while minimizing storage overhead and write latency.
 
 The system uses asynchronous database connections through SQLAlchemy's async engine and asyncpg driver. This decision enables non-blocking I/O operations, allowing the application to handle multiple concurrent requests efficiently without thread-based overhead. Async connections are particularly beneficial for this earthquake monitoring system because it performs frequent background ingestion tasks while simultaneously serving API requests. The async approach prevents database operations from blocking the event loop, ensuring that real-time data ingestion doesn't interfere with API responsiveness, and vice versa. Connection pooling is configured with sensible defaults to manage database resources effectively across concurrent operations.
 
