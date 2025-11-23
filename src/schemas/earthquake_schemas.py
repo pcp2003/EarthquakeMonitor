@@ -45,21 +45,6 @@ class EarthquakeBase(BaseModel):
     )
 
 
-class EarthquakeCreate(EarthquakeBase):
-    """Schema for creating a new earthquake record"""
-    
-    id: str = Field(
-        ...,
-        max_length=50,
-        description="USGS unique identifier"
-    )
-
-    model_config = ConfigDict(
-        str_strip_whitespace=True,
-        validate_assignment=True
-    )
-
-
 class EarthquakeResponse(EarthquakeBase):
     """Schema for earthquake API responses"""
     
@@ -227,20 +212,5 @@ class DataSyncResponse(BaseModel):
     start_time: datetime = Field(description="Operation start time")
     end_time: datetime = Field(description="Operation end time")
     duration_seconds: float = Field(description="Operation duration in seconds")
-
-    model_config = ConfigDict()
-
-
-class HealthCheckResponse(BaseModel):
-    """Schema for health check responses"""
-    
-    status: str = Field(description="Service status")
-    timestamp: datetime = Field(description="Health check timestamp")
-    database_status: str = Field(description="Database connection status")
-    usgs_api_status: str = Field(description="USGS API availability status")
-    last_ingestion: Optional[datetime] = Field(
-        None,
-        description="Last successful data synchronization timestamp"
-    )
 
     model_config = ConfigDict()

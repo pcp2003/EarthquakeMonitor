@@ -5,13 +5,11 @@ from decimal import Decimal
 # O import será resolvido através do sys.path configurado no config.py
 from schemas.earthquake_schemas import (
     EarthquakeBase,
-    EarthquakeCreate,
     EarthquakeResponse,
     EarthquakeFilter,
     PaginationParams,
     DataSyncRequest,
-    DataSyncResponse,
-    HealthCheckResponse
+    DataSyncResponse
 )
 
 
@@ -53,21 +51,6 @@ class TestEarthquakeSchemas:
                 depth=10.0,
                 magnitude=4.0
             )
-
-    def test_earthquake_create_schema(self):
-        """Test EarthquakeCreate schema"""
-        data = {
-            "id": "us1000abcd",
-            "time": datetime.now(timezone.utc),
-            "latitude": 37.7749,
-            "longitude": -122.4194,
-            "depth": 10.5,
-            "magnitude": 4.2,
-            "magnitude_type": "mw",
-            "place": "San Francisco, CA"
-        }
-        earthquake = EarthquakeCreate(**data)
-        assert earthquake.id == "us1000abcd"
 
     def test_pagination_params(self):
         """Test pagination parameter validation"""
@@ -177,17 +160,3 @@ class TestEarthquakeSchemas:
         assert response.records_processed == 100
         assert response.records_inserted == 85
 
-    def test_health_check_response(self):
-        """Test health check response schema"""
-        health_data = {
-            "status": "healthy",
-            "timestamp": datetime.now(timezone.utc),
-            "database_status": "connected",
-            "usgs_api_status": "available",
-            "last_ingestion": datetime.now(timezone.utc)
-        }
-        
-        health = HealthCheckResponse(**health_data)
-        assert health.status == "healthy"
-        assert health.database_status == "connected"
-        assert health.last_ingestion is not None

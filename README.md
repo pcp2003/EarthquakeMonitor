@@ -45,6 +45,20 @@ scripts/        # Utility scripts
 docs/           # Project documentation
 ```
 
+### Pydantic Schemas
+
+Active schemas in `src/schemas/earthquake_schemas.py`:
+
+- **EarthquakeBase** - Base schema with common earthquake fields
+- **EarthquakeResponse** - Schema for earthquake API responses with ID and creation timestamp
+- **EarthquakeListResponse** - Schema for paginated earthquake list responses
+- **EarthquakeFilter** - Schema for filtering earthquake records (magnitude, depth, time range, location)
+- **PaginationParams** - Schema for pagination parameters (page, limit)
+- **DataSyncRequest** - Schema for manual data synchronization requests
+- **DataSyncResponse** - Schema for data synchronization operation responses
+
+*Removed unused schemas: `EarthquakeCreate` (no POST endpoint for earthquake creation), `HealthCheckResponse` (health endpoint returns simple dict)*
+
 ## Database Setup
 
 1. **Connect to PostgreSQL:**
