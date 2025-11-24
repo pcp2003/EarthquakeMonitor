@@ -11,8 +11,8 @@ class USGSDataFormatter:
         try:
             features = data.get("features", [])
             if not isinstance(features, list):
-                self.logger.error("O campo 'features' não é uma lista válida.")
-                raise ValueError("O campo 'features' deve ser uma lista.")
+                self.logger.error("The 'features' field is not a list.")
+                raise ValueError("The 'features' field must be a list.")
             formatted = []
             errors = 0
             for feature in features:
@@ -41,7 +41,6 @@ class USGSDataFormatter:
                     continue
             if errors > 0:
                 self.logger.warning(f"Ignored {errors} invalid records out of {len(features)} total")
-            self.logger.info(f"Successfully formatted {len(formatted)} records")
             return formatted
         except Exception as e:
             self.logger.error(f"Error formatting data: {str(e)}")

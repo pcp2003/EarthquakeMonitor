@@ -3,7 +3,6 @@ from datetime import datetime, timedelta, timezone
 import sys
 import os
 
-# Garante que o src está no path
 SRC_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src'))
 if SRC_PATH not in sys.path:
     sys.path.insert(0, SRC_PATH)
@@ -22,7 +21,6 @@ async def calculate_frequency():
     print(f"Fetching earthquake data from {since} to {now}...")
 
     try:
-        # Cria o DataRequest conforme esperado pelo fetcher
         request = DataRequest(since_datetime=since)
         data = await fetcher.fetch(request)
         records = data.get("features", [])
