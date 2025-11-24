@@ -1,15 +1,13 @@
 import pytest
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from decimal import Decimal
-
-# O import será resolvido através do sys.path configurado no config.py
-from schemas.earthquake_schemas import (
+from src.schemas.earthquake_schemas import (
     EarthquakeBase,
     EarthquakeResponse,
     EarthquakeFilter,
     PaginationParams,
-    DataSyncRequest,
-    DataSyncResponse
+    DataRequest,
+    DataResponse
 )
 
 
@@ -100,28 +98,23 @@ class TestEarthquakeSchemas:
                 end_time=datetime(2023, 1, 1)
             )
 
-    def test_data_sync_request(self):
-        """Test data sync request schema"""
+    def test_data_request(self):
+        """Test data request schema"""
         # Valid request
-        request = DataSyncRequest(since_hours=48, limit=500)
-        assert request.since_hours == 48
-        assert request.limit == 500
+        dt = datetime.now() - timedelta(days=2)
+        request = DataRequest(since_datetime=dt)
+        assert request.since_datetime == dt
 
-        # Default values
-        request_default = DataSyncRequest()
-        assert request_default.since_hours == 24
-        assert request_default.limit == 1000
+        # Default value
+        request_default = DataRequest()
+        assert isinstance(request_default.since_datetime, datetime)
 
-        # Invalid values
+        # Invalid value (future date)
         with pytest.raises(ValueError):
-            DataSyncRequest(since_hours=200)  # Too many hours
-
-        with pytest.raises(ValueError):
-            DataSyncRequest(limit=25000)  # Too high limit
+            DataRequest(since_datetime=datetime.now() + timedelta(days=1))
 
     def test_earthquake_response_from_dict(self):
         """Test EarthquakeResponse can be created from database model"""
-        # Simulando dados que viriam do banco
         db_data = {
             "id": "us1000abcd",
             "time": datetime.now(timezone.utc),
@@ -134,17 +127,15 @@ class TestEarthquakeSchemas:
             "created_at": datetime.now(timezone.utc)
         }
         
-        # Teste manual de conversão (similar ao from_attributes=True)
         response = EarthquakeResponse(**db_data)
         assert response.id == "us1000abcd"
         assert response.magnitude == 4.2
         assert response.created_at is not None
 
-    def test_data_sync_response(self):
-        """Test data sync response schema"""
+    def test_data_response(self):
+        """Test data response schema"""
         start_time = datetime.now(timezone.utc)
         end_time = datetime.now(timezone.utc)
-        
         response_data = {
             "success": True,
             "message": "Data synchronization completed successfully",
@@ -154,8 +145,7 @@ class TestEarthquakeSchemas:
             "end_time": end_time,
             "duration_seconds": 5.2
         }
-        
-        response = DataSyncResponse(**response_data)
+        response = DataResponse(**response_data)
         assert response.success is True
         assert response.records_processed == 100
         assert response.records_inserted == 85

@@ -8,8 +8,8 @@ from .earthquake_schemas import (
     EarthquakeListResponse,
     EarthquakeFilter,
     PaginationParams,
-    DataSyncRequest,
-    DataSyncResponse
+    DataRequest,
+    DataResponse
 )
 
 __all__ = [
@@ -18,6 +18,6 @@ __all__ = [
     "EarthquakeListResponse",
     "EarthquakeFilter",
     "PaginationParams",
-    "DataSyncRequest",
-    "DataSyncResponse"
+    "DataRequest",
+    "DataResponse"
 ]

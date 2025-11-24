@@ -6,7 +6,8 @@ from apscheduler.triggers.interval import IntervalTrigger
 from config import SYNC_INTERVAL_MINUTES
 from database.connection import db_manager
 from repository.earthquake_repository import EarthquakeRepository
-from services.ingestion_service import IngestionService
+from services.usgs_data_fetcher import USGSDataFetcher
+from services.usgs_data_formatter import USGSDataFormatter
 from services.sync_service import EarthquakeSyncService
 
 logger = logging.getLogger(__name__)
@@ -32,8 +33,9 @@ class SchedulerService:
             async for session in db_manager.get_session():
                 try:
                     repository = EarthquakeRepository(session)
-                    ingestion_service = IngestionService()
-                    sync_service = EarthquakeSyncService(repository, ingestion_service)
+                    fetcher = USGSDataFetcher()
+                    formatter = USGSDataFormatter()
+                    sync_service = EarthquakeSyncService(repository, fetcher, formatter)
                     
                     result = await sync_service.sync_earthquakes()
                     

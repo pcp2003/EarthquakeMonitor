@@ -13,6 +13,7 @@ load_dotenv()
 
 # USGS API Configuration
 USGS_URL = "https://earthquake.usgs.gov/fdsnws/event/1/query"
+USGS_TIMEOUT = 30.0
 
 # Scheduler Configuration
 SYNC_INTERVAL_MINUTES = 1
@@ -27,7 +28,8 @@ DB_POOL_RECYCLE = 3600
 DB_ECHO = False
 
 # Logging configuration
+LOG_LEVEL = "INFO"
 logging.basicConfig(
-    level=logging.INFO,
+    level=getattr(logging, LOG_LEVEL.upper(), logging.INFO),
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )

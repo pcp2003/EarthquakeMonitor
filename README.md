@@ -1,18 +1,21 @@
 # Earthquake Monitor
 
-Backend system for collecting, storing and exposing earthquake data from the USGS public API.
+Backend system for collecting, storing, and exposing earthquake data from the USGS public API.
 
-This project retrieves earthquake events from the USGS API, stores them in a PostgreSQL database, and exposes them through a REST API built with FastAPI. A background scheduler periodically synchronizes new events, simulating real-time updates.
+This project retrieves earthquake events from the USGS API, stores them in a PostgreSQL database, and exposes them through a REST API built with FastAPI. The system features both manual and automatic ingestion: a manual endpoint for quick testing and a background scheduler for continuous synchronization. The sync interval is configurable in the code. A 5-minute interval was tested based on USGS statistics, but this is not a production recommendation.
 
 > **For detailed information about architectural and design decisions, see [docs/DESIGN_DECISIONS.md](docs/DESIGN_DECISIONS.md)**
 
 ## Features
 
-* Automatic ingestion of earthquake data every 1 minuto (configurável via .env)
-* Manual data pull endpoint for testing (`POST /api/v1/earthquakes/pull`)
-* REST API with pagination and filtering (`GET /api/v1/earthquakes/list`)
-* Health check endpoint for monitoring (`GET /api/v1/health`)
-* PostgreSQL persistence using SQLAlchemy (Async)
+* Automatic ingestion of earthquake data at a configurable interval (default is 1 minute for testing)
+* Manual data pull endpoint (`POST /api/v1/earthquakes/ManualSync`)
+* REST API with pagination and advanced filtering (`GET /api/v1/earthquakes/list`)
+* Health check endpoint (`GET /api/v1/health`)
+* PostgreSQL persistence using SQLAlchemy (Async, with pooling)
+* Duplicate prevention via `ON CONFLICT DO NOTHING`
+* Optimized indexes: BTREE for time, GIN for text search
+* Alembic for schema versioning
 * Full Docker support
 * Unit and integration tests (Pytest)
 
@@ -25,17 +28,18 @@ This project retrieves earthquake events from the USGS API, stores them in a Pos
 * APScheduler
 * Docker and docker-compose
 * Pydantic v2
+* Alembic (migrations)
 
 ## Project Structure
 
 ```
 src/
-  api/          # API Routes and dependencies
+  api/          # API routes and dependencies
   database/     # Database connection and session management
   models/       # SQLAlchemy ORM models
   repository/   # Data access layer
   schemas/      # Pydantic schemas for validation
-  services/     # Business logic (Ingestion, Sync, Scheduler)
+  services/     # Business logic (ingestion, sync, scheduler)
   main.py       # Application entry point
   config.py     # Configuration settings
 
@@ -43,6 +47,9 @@ tests/          # Unit and integration tests
 migrations/     # Alembic migrations
 scripts/        # Utility scripts
 docs/           # Project documentation
+alembic.ini     # Alembic config
+docker-compose.yml, Dockerfile # Docker setup
+requirements.txt # Python dependencies
 ```
 
 ### Pydantic Schemas
@@ -54,10 +61,10 @@ Active schemas in `src/schemas/earthquake_schemas.py`:
 - **EarthquakeListResponse** - Schema for paginated earthquake list responses
 - **EarthquakeFilter** - Schema for filtering earthquake records (magnitude, depth, time range, location)
 - **PaginationParams** - Schema for pagination parameters (page, limit)
-- **DataSyncRequest** - Schema for manual data synchronization requests
-- **DataSyncResponse** - Schema for data synchronization operation responses
+- **DataRequest** - Schema for manual data synchronization requests
+- **DataResponse** - Schema for data synchronization operation responses
 
-*Removed unused schemas: `EarthquakeCreate` (no POST endpoint for earthquake creation), `HealthCheckResponse` (health endpoint returns simple dict)*
+*Unused schemas removed: `EarthquakeCreate` (no POST endpoint for earthquake creation), `HealthCheckResponse` (health endpoint returns simple dict)*
 
 ## Database Setup
 
@@ -148,9 +155,7 @@ docker compose down
 
 **Docker services:**
 - **postgres** - PostgreSQL database (port 5432)
-  - Health check: verifica conexão a cada 5s
 - **app** - Python application (port 8000)
-  - Health check: verifica `/api/v1/health` a cada 30s
 
 **Check container health:**
 ```bash
@@ -172,7 +177,7 @@ http://localhost:8000/docs
 ## API Endpoints
 
 ### Health Check
-```bash
+```http
 GET /api/v1/health
 ```
 Checks API and database health status, returns total earthquakes and last sync time.
@@ -191,10 +196,10 @@ Checks API and database health status, returns total earthquakes and last sync t
 ```
 
 ### List Earthquakes
-```bash
+```http
 GET /api/v1/earthquakes/list?page=1&limit=20&min_magnitude=5.0
 ```
-Returns paginated list with optional filters:
+Returns a paginated list with optional filters:
 - `min_magnitude` / `max_magnitude`
 - `min_depth` / `max_depth`
 - `start_time` / `end_time` (ISO 8601 format)
@@ -202,17 +207,16 @@ Returns paginated list with optional filters:
 - `place_contains` (text search)
 
 ### Get Earthquake Details
-```bash
-GET /api/v1/earthquakes/{id}/details
+```http
+GET /api/v1/earthquakes/{earthquake_id}/details
 ```
 Returns detailed information about a specific earthquake.
 
-### Manual Data Pull
-```bash
-POST /api/v1/earthquakes/pull
+### Manual Data Sync
+```http
+POST /api/v1/earthquakes/ManualSync
 {
-  "since_hours": 24,
-  "limit": 1000
+  "since_datetime": "2025-11-24T13:44:50.790Z"
 }
 ```
-Manually pulls earthquake data from USGS API and stores in database.
+Manually pulls earthquake data from USGS API and stores it in the database.

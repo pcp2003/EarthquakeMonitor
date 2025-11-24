@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional, List
 from decimal import Decimal
 
@@ -167,11 +167,14 @@ class EarthquakeFilter(BaseModel):
     @field_validator('end_time')
     @classmethod
     def validate_time_range(cls, v, info):
-        """Ensure end_time is after start_time"""
+        """Ensure end_time is after start_time (naive datetimes)"""
         if v is not None and info.data:
             start_time = info.data.get('start_time')
-            if start_time is not None and v < start_time:
-                raise ValueError('end_time must be after start_time')
+            if start_time is not None:
+                v_naive = v.replace(tzinfo=None) if v.tzinfo else v
+                start_naive = start_time.replace(tzinfo=None) if start_time.tzinfo else start_time
+                if v_naive < start_naive:
+                    raise ValueError('end_time must be after start_time')
         return v
 
     model_config = ConfigDict(
@@ -180,21 +183,22 @@ class EarthquakeFilter(BaseModel):
     )
 
 
-class DataSyncRequest(BaseModel):
+class DataRequest(BaseModel):
     """Schema for manual data synchronization requests"""
     
-    since_hours: int = Field(
-        default=24,
-        ge=1,
-        le=168,
-        description="Hours back from now to fetch data (max 1 week)"
+
+    since_datetime: datetime = Field(
+        default_factory=lambda: datetime.now().replace(hour=0, minute=0, second=0, microsecond=0) - timedelta(days=1),
+        description="Cannot be a future date"
     )
-    limit: int = Field(
-        default=1000,
-        ge=1,
-        le=20000,
-        description="Maximum number of records to fetch from USGS API"
-    )
+
+    @field_validator('since_datetime')
+    @classmethod
+    def validate_not_future(cls, v):
+        now = datetime.now(v.tzinfo) if v.tzinfo else datetime.now()
+        if v > now:
+            raise ValueError('since_datetime cannot be a future date')
+        return v
 
     model_config = ConfigDict(
         str_strip_whitespace=True,
@@ -202,7 +206,7 @@ class DataSyncRequest(BaseModel):
     )
 
 
-class DataSyncResponse(BaseModel):
+class DataResponse(BaseModel):
     """Schema for data synchronization operation responses"""
     
     success: bool = Field(description="Whether the synchronization was successful")

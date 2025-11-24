@@ -1,19 +1,20 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import Annotated
+from datetime import timezone
 
 from database.connection import db_manager
 from repository.earthquake_repository import EarthquakeRepository
-from services.ingestion_service import IngestionService
-from services.sync_service import EarthquakeSyncService
+from services.usgs_data_fetcher import USGSDataFetcher
+from services.usgs_data_formatter import USGSDataFormatter
 from schemas.earthquake_schemas import (
     EarthquakeResponse, 
     EarthquakeListResponse, 
     EarthquakeFilter, 
     PaginationParams,
-    DataSyncRequest,
-    DataSyncResponse
+    DataRequest,
+    DataResponse
 )
+from datetime import datetime, timedelta
 import logging
 
 logger = logging.getLogger(__name__)
@@ -23,24 +24,64 @@ router = APIRouter()
 async def get_repository(session: AsyncSession = Depends(db_manager.get_session)) -> EarthquakeRepository:
     return EarthquakeRepository(session)
 
-async def get_ingestion_service() -> IngestionService:
-    return IngestionService()
+async def get_usgs_services():
+    fetcher = USGSDataFetcher()
+    formatter = USGSDataFormatter()
+    return fetcher, formatter
 
-async def get_sync_service(
-    repository: EarthquakeRepository = Depends(get_repository),
-    ingestion_service: IngestionService = Depends(get_ingestion_service)
-) -> EarthquakeSyncService:
-    return EarthquakeSyncService(repository, ingestion_service)
-
-@router.post("/earthquakes/pull", response_model=DataSyncResponse)
+@router.post("/earthquakes/ManualSync", response_model=DataResponse)
 async def pull_earthquakes(
-    request: DataSyncRequest,
-    sync_service: EarthquakeSyncService = Depends(get_sync_service)
+    request: DataRequest,
+    repository: EarthquakeRepository = Depends(get_repository),
+    fetcher_formatter = Depends(get_usgs_services)
 ):
     """
     Manually pull earthquake data from USGS API and store in database.
     """
-    return await sync_service.sync_earthquakes(request)
+    fetcher, formatter = fetcher_formatter
+    start_time = datetime.now(timezone.utc)
+    try:
+        raw_earthquakes_data = await fetcher.fetch(request)
+        formatted_earthquakes_data = await formatter.format(raw_earthquakes_data)
+        records_processed = len(formatted_earthquakes_data)
+        records_inserted = await repository.bulk_insert(formatted_earthquakes_data)
+        end_time = datetime.now(timezone.utc)
+        duration = (end_time - start_time).total_seconds()
+        return DataResponse(
+            success=True,
+            message="Synchronization completed successfully",
+            records_processed=records_processed,
+            records_inserted=records_inserted,
+            start_time=start_time,
+            end_time=end_time,
+            duration_seconds=duration
+        )
+    except Exception as e:
+        import sqlalchemy.exc
+        if (
+            isinstance(e, sqlalchemy.exc.InterfaceError)
+            or (hasattr(e, '__class__') and 'InterfaceError' in e.__class__.__name__)
+            and 'number of query arguments cannot exceed' in str(e)
+        ):
+            user_message = (
+                "Too many records to insert at once. "
+                "Please try synchronizing a smaller amount of data. "
+                "(PostgreSQL allows a maximum of 32767 query arguments per request.)"
+            )
+        else:
+            user_message = f"Synchronization failed: {str(e)}"
+        logger.error(f"Synchronization failed: {str(e)}", exc_info=True)
+        end_time = datetime.now(timezone.utc)
+        duration = (end_time - start_time).total_seconds()
+        return DataResponse(
+            success=False,
+            message=user_message,
+            records_processed=0,
+            records_inserted=0,
+            start_time=start_time,
+            end_time=end_time,
+            duration_seconds=duration
+        )
 
 @router.get("/earthquakes/list", response_model=EarthquakeListResponse)
 async def list_earthquakes(
