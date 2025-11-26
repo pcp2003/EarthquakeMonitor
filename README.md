@@ -95,7 +95,12 @@ DATABASE_URL=postgresql+asyncpg://earthquake_user:your_password_here@localhost:5
 
 **Connect to the earthquake database:**
 ```bash
-psql -h localhost -U earthquake_user -d earthquake_monitor
+docker compose exec postgres psql -U earthquake_user -d earthquake_monitor
+```
+
+**Erase Database entries**
+```bash
+TRUNCATE TABLE table_name
 ```
 
 **Common PostgreSQL commands:**
