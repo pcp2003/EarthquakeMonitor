@@ -115,3 +115,13 @@ class EarthquakeRepository:
         query = select(func.count(Earthquake.id))
         result = await self.session.execute(query)
         return result.scalar_one()
+    
+    async def delete_all(self) -> None:
+        """
+        Delete all earthquake records from the database.
+        Useful for resetting the dataset during testing or maintenance.
+        """
+        query = Earthquake.__table__.delete()
+        await self.session.execute(query)
+        await self.session.commit()
+        self.logger.info("All earthquake records have been deleted.")

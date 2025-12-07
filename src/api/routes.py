@@ -1,11 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from datetime import timezone
+from datetime import timezone, datetime, timedelta
+import logging
 
 from database.connection import db_manager
 from repository.earthquake_repository import EarthquakeRepository
 from services.usgs_data_fetcher import USGSDataFetcher
 from services.usgs_data_formatter import USGSDataFormatter
+from services.sync_service import EarthquakeSyncService
 from schemas.earthquake_schemas import (
     EarthquakeResponse, 
     EarthquakeListResponse, 
@@ -14,8 +16,6 @@ from schemas.earthquake_schemas import (
     DataRequest,
     DataResponse
 )
-from datetime import datetime, timedelta
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +23,10 @@ router = APIRouter()
 
 async def get_repository(session: AsyncSession = Depends(db_manager.get_session)) -> EarthquakeRepository:
     return EarthquakeRepository(session)
+
+def get_scheduler():
+    from main import scheduler
+    return scheduler
 
 async def get_usgs_services():
     fetcher = USGSDataFetcher()
@@ -158,3 +162,66 @@ async def health_check(
                 "message": str(e)
             }
         )
+    
+@router.delete("/earthquakes/delete_all", response_model=dict)
+async def delete_all_earthquakes(
+    repository: EarthquakeRepository = Depends(get_repository)
+):
+    """
+    Delete all earthquake records from the database.
+    Useful for resetting the dataset during testing or maintenance.
+    """
+    await repository.delete_all()
+    return {"message": "All earthquake records have been deleted."}
+
+# ==================== SCHEDULER MANAGEMENT ROUTES ====================
+
+@router.post("/scheduler/start")
+async def start_scheduler(scheduler_service = Depends(get_scheduler)):
+    """
+    Start the scheduler to enable automatic earthquake data synchronization.
+    """
+    if not scheduler_service.scheduler.running:
+        scheduler_service.start()
+        return {"message": "Scheduler started"}
+    return {"message": "Scheduler is already running"}
+
+@router.post("/scheduler/stop")
+async def stop_scheduler(scheduler_service = Depends(get_scheduler)):
+    """
+    Stop the scheduler to disable automatic earthquake data synchronization.
+    """
+    if scheduler_service.scheduler.running:
+        scheduler_service.shutdown()
+        return {"message": "Scheduler stopped"}
+    return {"message": "Scheduler is already stopped"}
+
+@router.post("/scheduler/sync-now")
+async def sync_now(repository: EarthquakeRepository = Depends(get_repository)):
+    """
+    Force an immediate synchronization of earthquake data from USGS.
+    Does not depend on the scheduler status.
+    """
+    fetcher = USGSDataFetcher()
+    formatter = USGSDataFormatter()
+    sync_service = EarthquakeSyncService(repository, fetcher, formatter)
+    result = await sync_service.sync_earthquakes()
+    return result
+
+@router.get("/scheduler/status")
+async def scheduler_status(scheduler_service = Depends(get_scheduler)):
+    """
+    Get the current status of the scheduler and list all scheduled jobs.
+    """
+    jobs = scheduler_service.scheduler.get_jobs()
+    return {
+        "running": scheduler_service.scheduler.running,
+        "jobs": [
+            {
+                "id": job.id,
+                "name": job.name, 
+                "next_run_time": job.next_run_time.isoformat() if job.next_run_time else None
+            }
+            for job in jobs
+        ]
+    }

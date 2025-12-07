@@ -21,12 +21,10 @@ async def lifespan(app: FastAPI):
     Handle application startup and shutdown events.
     """
     logger.info("Starting Earthquake Monitor API...")
-    scheduler.start()
     
     yield
     
     logger.info("Shutting down Earthquake Monitor API...")
-    scheduler.shutdown()
     
     await db_manager.close()
 
