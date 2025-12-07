@@ -1,0 +1,19 @@
+{
+  "generator-cli": {
+    "version": "7.10.0",
+    "generators": {
+      "typescript-angular": {
+        "inputSpec": "../openapi.json",
+        "output": "./src/app/api",
+        "generatorName": "typescript-angular",
+        "additionalProperties": {
+          "ngVersion": "21",
+          "fileNaming": "kebab-case",
+          "modelPropertyNaming": "original",
+          "supportsES6": true,
+          "withInterfaces": true
+        }
+      }
+    }
+  }
+}

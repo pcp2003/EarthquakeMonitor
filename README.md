@@ -307,3 +307,39 @@ npm run build
 ```
 
 The production build will be created in `dist/frontend/browser/`.
+
+## API Type Generation
+
+The project automatically generates TypeScript interfaces from the backend OpenAPI specification to ensure type safety and synchronization between frontend and backend.
+
+### Automatic Generation (CI/CD)
+
+The GitHub Actions workflow `.github/workflows/sync-api-types.yml` automatically:
+- Detects changes in backend Python files
+- Generates TypeScript interfaces and Angular services
+- Commits the changes if there are updates
+
+This ensures the frontend types are always in sync with the backend API.
+
+### Manual Generation (Local Development)
+
+To generate types locally during development:
+
+1. **Ensure the backend is running:**
+```bash
+docker compose up
+```
+
+2. **Run the generation script:**
+```bash
+./scripts/generate-api-types.sh
+```
+
+This will:
+- Download the OpenAPI spec from `http://localhost:8000/openapi.json`
+- Generate TypeScript interfaces and Angular services in `frontend/src/app/api/`
+- The generated files can then be used in your Angular components
+
+**Generated files location:** `frontend/src/app/api/`
+
+⚠️ **Important**: Never edit the generated files manually! They will be overwritten on the next generation.
