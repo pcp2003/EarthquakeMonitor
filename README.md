@@ -1,13 +1,14 @@
 # Earthquake Monitor
 
-Backend system for collecting, storing, and exposing earthquake data from the USGS public API.
+Full-stack system for collecting, storing, and visualizing earthquake data from the USGS public API.
 
-This project retrieves earthquake events from the USGS API, stores them in a PostgreSQL database, and exposes them through a REST API built with FastAPI. The system features both manual and automatic ingestion: a manual endpoint for quick testing and a background scheduler for continuous synchronization. The sync interval is configurable in the code. A 5-minute interval was tested based on USGS statistics, but this is not a production recommendation.
+This project retrieves earthquake events from the USGS API, stores them in a PostgreSQL database, and exposes them through a REST API built with FastAPI. A modern Angular frontend provides an intuitive interface for viewing and filtering earthquake data. The system features both manual and automatic ingestion: a manual endpoint for quick testing and a background scheduler for continuous synchronization. The sync interval is configurable in the code. A 5-minute interval was tested based on USGS statistics, but this is not a production recommendation.
 
 > **For detailed information about architectural and design decisions, see [docs/DESIGN_DECISIONS.md](docs/DESIGN_DECISIONS.md)**
 
 ## Features
 
+### Backend
 * Automatic ingestion of earthquake data at a configurable interval (default is 1 minute for testing)
 * Manual data pull endpoint (`POST /api/v1/earthquakes/ManualSync`)
 * REST API with pagination and advanced filtering (`GET /api/v1/earthquakes/list`)
@@ -16,40 +17,69 @@ This project retrieves earthquake events from the USGS API, stores them in a Pos
 * Duplicate prevention via `ON CONFLICT DO NOTHING`
 * Optimized indexes: BTREE for time, GIN for text search
 * Alembic for schema versioning
-* Full Docker support
 * Unit and integration tests (Pytest)
+
+### Frontend
+* Modern Angular 21 application
+* Responsive user interface
+* Real-time earthquake data visualization
+* Advanced filtering capabilities
+* Nginx reverse proxy for API requests
+* Production-optimized build with multi-stage Docker
 
 ## Technologies
 
+### Backend
 * Python 3.11
 * FastAPI
 * SQLAlchemy 2.0 (Async)
 * PostgreSQL
 * APScheduler
-* Docker and docker-compose
 * Pydantic v2
 * Alembic (migrations)
+
+### Frontend
+* Angular 21
+* TypeScript 5.9
+* RxJS 7.8
+* Nginx (for production serving)
+
+### Infrastructure
+* Docker and docker-compose
+* Multi-stage Docker builds
+* Nginx reverse proxy
 
 ## Project Structure
 
 ```
-src/
-  api/          # API routes and dependencies
-  database/     # Database connection and session management
-  models/       # SQLAlchemy ORM models
-  repository/   # Data access layer
-  schemas/      # Pydantic schemas for validation
-  services/     # Business logic (ingestion, sync, scheduler)
-  main.py       # Application entry point
-  config.py     # Configuration settings
+src/                    # Backend source code
+  api/                  # API routes and dependencies
+  database/             # Database connection and session management
+  models/               # SQLAlchemy ORM models
+  repository/           # Data access layer
+  schemas/              # Pydantic schemas for validation
+  services/             # Business logic (ingestion, sync, scheduler)
+  main.py               # Application entry point
+  config.py             # Configuration settings
 
-tests/          # Unit and integration tests
-migrations/     # Alembic migrations
-scripts/        # Utility scripts
-docs/           # Project documentation
-alembic.ini     # Alembic config
-docker-compose.yml, Dockerfile # Docker setup
-requirements.txt # Python dependencies
+frontend/               # Angular frontend application
+  src/                  # Frontend source code
+    app/                # Angular components and services
+    index.html          # Main HTML file
+    main.ts             # Application entry point
+    styles.css          # Global styles
+  Dockerfile            # Frontend Docker configuration
+  nginx.conf            # Nginx configuration for production
+  angular.json          # Angular CLI configuration
+  package.json          # Node.js dependencies
+
+tests/                  # Unit and integration tests
+migrations/             # Alembic migrations
+scripts/                # Utility scripts
+docs/                   # Project documentation
+docker-compose.yml      # Docker orchestration
+Dockerfile              # Backend Docker configuration
+requirements.txt        # Python dependencies
 ```
 
 ### Pydantic Schemas
@@ -140,44 +170,62 @@ cp .env.example .env
 
 2. **Build and start all services:**
 ```bash
-docker compose up -d
+docker compose up --build
 ```
 
-3. **View application logs:**
+3. **Access the application:**
+- **Frontend (Angular)**: http://localhost:4200
+- **Backend API Documentation**: http://localhost:8000/docs
+- **Backend API**: http://localhost:8000/api/v1
+
+4. **View application logs:**
 ```bash
+# All services
+docker compose logs -f
+
+# Specific service
 docker compose logs app -f
+docker compose logs frontend -f
+docker compose logs postgres -f
 ```
 
-4. **Run database migrations (if needed):**
+5. **Run database migrations (if needed):**
 ```bash
 docker compose exec app alembic upgrade head
 ```
 
-5. **Stop all services:**
+6. **Stop all services:**
 ```bash
 docker compose down
 ```
 
 **Docker services:**
 - **postgres** - PostgreSQL database (port 5432)
-- **app** - Python application (port 8000)
+- **app** - FastAPI backend application (port 8000)
+- **frontend** - Angular frontend with Nginx (port 4200 → 80)
 
 **Check container health:**
 ```bash
 docker compose ps
 ```
 
-### Docker Setup
+### Architecture
 
-```bash
-docker-compose up --build
-```
+The application uses a three-tier architecture:
 
-Once running, the API documentation is available at:
+1. **Frontend (Angular + Nginx)**: 
+   - Serves the Angular application on port 4200
+   - Nginx reverse proxy routes `/api/*` requests to the backend
+   - Production-optimized build with multi-stage Docker
 
-```
-http://localhost:8000/docs
-```
+2. **Backend (FastAPI)**: 
+   - Exposes REST API on port 8000
+   - Handles data synchronization with USGS
+   - Manages database operations
+
+3. **Database (PostgreSQL)**: 
+   - Stores earthquake data on port 5432
+   - Optimized indexes for performance
 
 ## API Endpoints
 
@@ -225,3 +273,37 @@ POST /api/v1/earthquakes/ManualSync
 }
 ```
 Manually pulls earthquake data from USGS API and stores it in the database.
+
+## Frontend Development
+
+### Local Development (without Docker)
+
+If you want to develop the frontend locally without Docker:
+
+1. **Navigate to frontend directory:**
+```bash
+cd frontend
+```
+
+2. **Install dependencies:**
+```bash
+npm install
+```
+
+3. **Start development server:**
+```bash
+npm start
+```
+
+The frontend will be available at `http://localhost:4200` with hot-reload enabled.
+
+**Note**: When running locally, ensure the backend is running (either via Docker or locally on port 8000) for API requests to work.
+
+### Building for Production
+
+```bash
+cd frontend
+npm run build
+```
+
+The production build will be created in `dist/frontend/browser/`.

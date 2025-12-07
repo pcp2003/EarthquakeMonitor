@@ -46,6 +46,18 @@ services:
     networks:
       - earthquake_network
 
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: earthquake_frontend
+    depends_on:
+      - app
+    ports:
+      - "4200:80"
+    networks:
+      - earthquake_network
+
 volumes:
   postgres_data:
 
