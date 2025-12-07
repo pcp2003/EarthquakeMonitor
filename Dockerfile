@@ -8,6 +8,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     gcc \
     curl \
+    postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first for better caching
@@ -20,9 +21,13 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY src/ ./src/
 COPY migrations/ ./migrations/
 COPY alembic.ini .
+COPY docker-entrypoint.sh .
+
+# Make entrypoint script executable
+RUN chmod +x docker-entrypoint.sh
 
 # Expose port
 EXPOSE 8000
 
 # Command to run the application
-CMD ["python", "src/main.py"]
+ENTRYPOINT ["./docker-entrypoint.sh"]
