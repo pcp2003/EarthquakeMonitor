@@ -1,1 +1,159 @@
-<p>earthquake-list works!</p>
+<div class="earthquake-list-container">
+  <h1>Earthquake Monitor</h1>
+
+  <!-- Filtros -->
+  <div class="filters-section">
+    <h2>Filters</h2>
+    <div class="filter-grid">
+      <div class="filter-group">
+        <label for="min-magnitude">Min Magnitude:</label>
+        <input
+          type="number"
+          id="min-magnitude"
+          [value]="filters.min_magnitude || ''"
+          (change)="onMinMagnitudeChange($event)"
+          placeholder="e.g., 2.5"
+          step="0.1"
+        />
+      </div>
+
+      <div class="filter-group">
+        <label for="max-magnitude">Max Magnitude:</label>
+        <input
+          type="number"
+          id="max-magnitude"
+          [value]="filters.max_magnitude || ''"
+          (change)="onMaxMagnitudeChange($event)"
+          placeholder="e.g., 9.0"
+          step="0.1"
+        />
+      </div>
+
+      <div class="filter-group">
+        <label for="min-depth">Min Depth (km):</label>
+        <input
+          type="number"
+          id="min-depth"
+          [value]="filters.min_depth || ''"
+          (change)="onMinDepthChange($event)"
+          placeholder="e.g., 0"
+          step="1"
+        />
+      </div>
+
+      <div class="filter-group">
+        <label for="max-depth">Max Depth (km):</label>
+        <input
+          type="number"
+          id="max-depth"
+          [value]="filters.max_depth || ''"
+          (change)="onMaxDepthChange($event)"
+          placeholder="e.g., 800"
+          step="1"
+        />
+      </div>
+
+      <div class="filter-group">
+        <label for="location">Location:</label>
+        <input
+          type="text"
+          id="location"
+          [value]="filters.place_contains || ''"
+          (change)="onLocationChange($event)"
+          placeholder="e.g., 'California'"
+        />
+      </div>
+
+      <div class="filter-group">
+        <label for="magnitude-type">Magnitude Type:</label>
+        <input
+          type="text"
+          id="magnitude-type"
+          [value]="filters.magnitude_type || ''"
+          (change)="onMagnitudeTypeChange($event)"
+          placeholder="e.g., 'Mw'"
+        />
+      </div>
+    </div>
+    <button (click)="clearFilters()" class="btn-clear">Clear Filters</button>
+  </div>
+
+  <!-- Estado de carregamento -->
+  @if (loading) {
+    <div class="loading">Loading earthquakes...</div>
+  }
+
+  <!-- Mensagem de erro -->
+  @if (error) {
+    <div class="error-message">{{ error }}</div>
+  }
+
+  <!-- Lista de Earthquakes -->
+  @if (earthquakes && !loading) {
+    <div class="results-section">
+      <h2>Results ({{ earthquakes.total }} total)</h2>
+      <div class="earthquake-count">
+        Showing page {{ earthquakes.page }}
+        ({{ earthquakes.earthquakes.length }} earthquakes per page)
+      </div>
+
+      @if (earthquakes.earthquakes.length === 0) {
+        <p class="no-results">No earthquakes found matching your criteria.</p>
+      } @else {
+        <div class="earthquakes-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Time (UTC)</th>
+                <th>Magnitude</th>
+                <th>Type</th>
+                <th>Depth (km)</th>
+                <th>Latitude</th>
+                <th>Longitude</th>
+                <th>Location</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (earthquake of earthquakes.earthquakes; track earthquake.usgs_id) {
+                <tr class="earthquake-row">
+                  <td class="time">{{ earthquake.time }}</td>
+                  <td class="magnitude" [class.major]="earthquake.magnitude! >= 6">
+                    {{ earthquake.magnitude || 'N/A' }}
+                  </td>
+                  <td class="magnitude-type">{{ earthquake.magnitude_type || 'N/A' }}</td>
+                  <td class="depth">{{ earthquake.depth || 'N/A' }}</td>
+                  <td class="latitude">{{ earthquake.latitude }}</td>
+                  <td class="longitude">{{ earthquake.longitude }}</td>
+                  <td class="location">{{ earthquake.place || 'Unknown' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+
+      <!-- Paginação -->
+      <div class="pagination">
+        <button 
+          [disabled]="!earthquakes.has_previous" 
+          (click)="goToPage(earthquakes.page - 1)"
+          class="btn-pagination"
+        >
+          ← Previous
+        </button>
+
+        <div class="page-info">
+          Page {{ earthquakes.page }}
+        </div>
+
+        <button 
+          [disabled]="!earthquakes.has_next" 
+          (click)="goToPage(earthquakes.page + 1)"
+          class="btn-pagination"
+        >
+          Next →
+        </button>
+      </div>
+    </div>
+  }
+</div>

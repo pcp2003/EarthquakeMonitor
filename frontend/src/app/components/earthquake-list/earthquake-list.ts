@@ -62,10 +62,70 @@ export class EarthquakeList implements OnInit {
   }
 
   /**
-   * Apply filters and reset to first page.
+   * Update minimum magnitude filter
    */
-  applyFilters(newFilters: EarthquakeFilter): void {
-    this.filters = newFilters;
+  onMinMagnitudeChange(event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    this.filters.min_magnitude = value ? parseFloat(value) : undefined;
+    this.pagination.page = 1;
+    this.loadEarthquakes();
+  }
+
+  /**
+   * Update maximum magnitude filter
+   */
+  onMaxMagnitudeChange(event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    this.filters.max_magnitude = value ? parseFloat(value) : undefined;
+    this.pagination.page = 1;
+    this.loadEarthquakes();
+  }
+
+  /**
+   * Update minimum depth filter
+   */
+  onMinDepthChange(event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    this.filters.min_depth = value ? parseFloat(value) : undefined;
+    this.pagination.page = 1;
+    this.loadEarthquakes();
+  }
+
+  /**
+   * Update maximum depth filter
+   */
+  onMaxDepthChange(event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    this.filters.max_depth = value ? parseFloat(value) : undefined;
+    this.pagination.page = 1;
+    this.loadEarthquakes();
+  }
+
+  /**
+   * Update location filter
+   */
+  onLocationChange(event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    this.filters.place_contains = value || undefined;
+    this.pagination.page = 1;
+    this.loadEarthquakes();
+  }
+
+  /**
+   * Update magnitude type filter
+   */
+  onMagnitudeTypeChange(event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    this.filters.magnitude_type = value || undefined;
+    this.pagination.page = 1;
+    this.loadEarthquakes();
+  }
+
+  /**
+   * Clear all filters and reset to first page
+   */
+  clearFilters(): void {
+    this.filters = {};
     this.pagination.page = 1;
     this.loadEarthquakes();
   }

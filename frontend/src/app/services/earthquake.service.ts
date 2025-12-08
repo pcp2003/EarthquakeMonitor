@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { EarthquakeListResponse } from '../api/model/earthquake-list-response';
 import { EarthquakeResponse } from '../api/model/earthquake-response';
@@ -19,6 +19,10 @@ export class EarthquakeService {
   /**
    * Gets a paginated list of earthquakes with optional filtering.
    *
+   * Sends filters and pagination parameters as a JSON request body.
+   * This approach ensures proper OpenAPI schema generation and automatic
+   * TypeScript interface generation from the backend specification.
+   *
    * @param filters Filter parameters with validation (min/max magnitude, depth, time range, location, magnitude type)
    * @param pagination Pagination parameters with validation (page >= 1, limit 1-1000)
    * @returns Observable with the paginated response
@@ -27,27 +31,15 @@ export class EarthquakeService {
     filters?: EarthquakeFilter,
     pagination?: PaginationParams
   ): Observable<EarthquakeListResponse> {
-    let params = new HttpParams();
+    const request = {
+      filters: filters || {},
+      pagination: pagination || { page: 1, limit: 50 }
+    };
 
-    if (pagination) {
-      Object.keys(pagination).forEach(key => {
-        const value = pagination[key as keyof PaginationParams];
-        if (value !== undefined && value !== null) {
-          params = params.set(key, value.toString());
-        }
-      });
-    }
-
-    if (filters) {
-      Object.keys(filters).forEach(key => {
-        const value = filters[key as keyof EarthquakeFilter];
-        if (value !== undefined && value !== null) {
-          params = params.set(key, value.toString());
-        }
-      });
-    }
-
-    return this.http.get<EarthquakeListResponse>(`${this.apiUrl}/list`, { params });
+    return this.http.post<EarthquakeListResponse>(
+      `${this.apiUrl}/list`,
+      request
+    );
   }
 
   /**

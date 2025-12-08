@@ -40,6 +40,8 @@ Alembic is used for schema management, even with a single table. This ensures a 
 **API:**
 The API is minimal, exposing endpoints to list earthquakes (with advanced filters), get details of an event, and trigger manual ingestion. This keeps the service simple and complete.
 
+The `/earthquakes/list` endpoint uses POST instead of GET to ensure proper OpenAPI schema generation and automatic TypeScript interface generation for the frontend. While counterintuitive, this design decision prioritizes maintaining a single source of truth (backend schemas) over strict HTTP conventions. The request body contains a structured `ListEarthquakesRequest` that wraps both `EarthquakeFilter` and `PaginationParams`, enabling the OpenAPI generator to produce accurate TypeScript interfaces and preventing code duplication between backend and frontend. This approach follows modern API practices used by GraphQL, Elasticsearch, and other systems handling complex query parameters.
+
 
 **Application Lifecycle:**
 FastAPI's lifespan context manager handles the scheduler and connection cleanup, ensuring clean startup and shutdown.

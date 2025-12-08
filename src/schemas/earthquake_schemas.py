@@ -38,7 +38,7 @@ class EarthquakeBase(BaseModel):
         None, 
         max_length=10,
         description="Magnitude type (mb, ml, mw, etc)"
-    )
+    
     place: Optional[str] = Field(
         None,
         description="Location description"
@@ -218,3 +218,27 @@ class DataResponse(BaseModel):
     duration_seconds: float = Field(description="Operation duration in seconds")
 
     model_config = ConfigDict()
+
+
+class ListEarthquakesRequest(BaseModel):
+    """Schema for earthquake list request with filters and pagination.
+    
+    This wrapper schema ensures proper OpenAPI schema generation for TypeScript
+    client code generation. By combining filters and pagination into a single
+    request body, we maintain a single source of truth while enabling automatic
+    interface generation in the frontend.
+    """
+    
+    filters: EarthquakeFilter = Field(
+        default_factory=EarthquakeFilter,
+        description="Filter criteria for earthquake records"
+    )
+    pagination: PaginationParams = Field(
+        default_factory=PaginationParams,
+        description="Pagination parameters for result set"
+    )
+
+    model_config = ConfigDict(
+        str_strip_whitespace=True,
+        validate_assignment=True
+    )

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from datetime import timezone, datetime, timedelta
 import logging
@@ -14,7 +14,8 @@ from schemas.earthquake_schemas import (
     EarthquakeFilter, 
     PaginationParams,
     DataRequest,
-    DataResponse
+    DataResponse,
+    ListEarthquakesRequest
 )
 
 logger = logging.getLogger(__name__)
@@ -33,7 +34,7 @@ async def get_usgs_services():
     formatter = USGSDataFormatter()
     return fetcher, formatter
 
-@router.post("/earthquakes/ManualSync", response_model=DataResponse)
+@router.post("/earthquakes/manual-sync", response_model=DataResponse)
 async def pull_earthquakes(
     request: DataRequest,
     repository: EarthquakeRepository = Depends(get_repository),
@@ -87,25 +88,40 @@ async def pull_earthquakes(
             duration_seconds=duration
         )
 
-@router.get("/earthquakes/list", response_model=EarthquakeListResponse)
+@router.post("/earthquakes/list", response_model=EarthquakeListResponse)
 async def list_earthquakes(
-    filters: EarthquakeFilter = EarthquakeFilter(),
-    pagination: PaginationParams = PaginationParams(),
+    request: ListEarthquakesRequest,
     repository: EarthquakeRepository = Depends(get_repository)
 ):
     """
     List earthquakes with optional filtering and pagination.
-    """
-    earthquakes, total = await repository.get_filtered(filters, pagination)
     
-    has_next = (pagination.page * pagination.limit) < total
-    has_previous = pagination.page > 1
+    Request Body:
+    - filters: Object containing filter criteria
+      - min_magnitude: Minimum earthquake magnitude (0-10)
+      - max_magnitude: Maximum earthquake magnitude (0-10)
+      - min_depth: Minimum depth in kilometers
+      - max_depth: Maximum depth in kilometers
+      - start_time: Start time filter (ISO 8601 format)
+      - end_time: End time filter (ISO 8601 format)
+      - place_contains: Filter by location description
+      - magnitude_type: Filter by magnitude type (mb, ml, mw, etc)
+    - pagination: Object containing pagination parameters
+      - page: Page number (starts at 1)
+      - limit: Records per page (max 1000)
+    
+    Returns paginated earthquake list with filter applied and navigation flags.
+    """
+    earthquakes, total = await repository.get_filtered(request.filters, request.pagination)
+    
+    has_next = (request.pagination.page * request.pagination.limit) < total
+    has_previous = request.pagination.page > 1
     
     return EarthquakeListResponse(
         earthquakes=earthquakes,
         total=total,
-        page=pagination.page,
-        limit=pagination.limit,
+        page=request.pagination.page,
+        limit=request.pagination.limit,
         has_next=has_next,
         has_previous=has_previous
     )
@@ -163,7 +179,7 @@ async def health_check(
             }
         )
     
-@router.delete("/earthquakes/delete_all", response_model=dict)
+@router.delete("/earthquakes/delete-all", response_model=dict)
 async def delete_all_earthquakes(
     repository: EarthquakeRepository = Depends(get_repository)
 ):
