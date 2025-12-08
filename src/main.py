@@ -38,7 +38,7 @@ app = FastAPI(
 
 app.include_router(api_router, prefix="/api/v1", tags=["earthquakes"])
 
-app.add.middleware(
+app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:4200"],  # Substitua pelo domínio do frontend em produção
     allow_credentials=True,
