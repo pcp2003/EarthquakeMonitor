@@ -10,7 +10,7 @@ from services.usgs_data_formatter import USGSDataFormatter
 from services.sync_service import EarthquakeSyncService
 from schemas.earthquake_schemas import (
     EarthquakeResponse, 
-    EarthquakeListResponse, 
+    EarthquakeListResponse,
     EarthquakeFilter, 
     PaginationParams,
     DataRequest,
@@ -89,8 +89,8 @@ async def pull_earthquakes(
 
 @router.get("/earthquakes/list", response_model=EarthquakeListResponse)
 async def list_earthquakes(
-    filters: EarthquakeFilter = Depends(),
-    pagination: PaginationParams = Depends(),
+    filters: EarthquakeFilter = EarthquakeFilter(),
+    pagination: PaginationParams = PaginationParams(),
     repository: EarthquakeRepository = Depends(get_repository)
 ):
     """
