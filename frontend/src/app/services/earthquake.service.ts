@@ -31,10 +31,17 @@ export class EarthquakeService {
     filters?: EarthquakeFilter,
     pagination?: PaginationParams
   ): Observable<EarthquakeListResponse> {
+    // Clean filters - remove undefined values to avoid sending them
+    const cleanedFilters = filters ? Object.fromEntries(
+      Object.entries(filters).filter(([_, v]) => v !== undefined)
+    ) : {};
+
     const request = {
-      filters: filters || {},
+      filters: cleanedFilters,
       pagination: pagination || { page: 1, limit: 50 }
     };
+
+    console.log('Sending earthquake list request:', request);
 
     return this.http.post<EarthquakeListResponse>(
       `${this.apiUrl}/list`,

@@ -85,13 +85,15 @@ class PaginationParams(BaseModel):
     page: int = Field(
         default=1,
         ge=1,
-        description="Page number (starts at 1)"
+        description="Page number (starts at 1)",
+        example=1
     )
     limit: int = Field(
         default=50,
         ge=1,
         le=1000,
-        description="Number of records per page (max 1000)"
+        description="Number of records per page (max 1000)",
+        example=20
     )
 
     @property
@@ -107,41 +109,49 @@ class EarthquakeFilter(BaseModel):
         None,
         ge=0.0,
         le=10.0,
-        description="Minimum magnitude filter"
+        description="Minimum magnitude filter",
+        example=4.5
     )
     max_magnitude: Optional[float] = Field(
         None,
         ge=0.0,
         le=10.0,
-        description="Maximum magnitude filter"
+        description="Maximum magnitude filter",
+        example=7.0
     )
     min_depth: Optional[float] = Field(
         None,
         ge=0.0,
-        description="Minimum depth filter (km)"
+        description="Minimum depth filter (km)",
+        example=10.0
     )
     max_depth: Optional[float] = Field(
         None,
         ge=0.0,
-        description="Maximum depth filter (km)"
+        description="Maximum depth filter (km)",
+        example=600.0
     )
     start_time: Optional[datetime] = Field(
         None,
-        description="Start time filter (UTC)"
+        description="Start time filter (UTC)",
+        example="2025-11-08T00:00:00"
     )
     end_time: Optional[datetime] = Field(
         None,
-        description="End time filter (UTC)"
+        description="End time filter (UTC)",
+        example="2025-12-08T23:59:59"
     )
     place_contains: Optional[str] = Field(
         None,
         max_length=200,
-        description="Filter by place description (case-insensitive)"
+        description="Filter by place description (case-insensitive)",
+        example="Japan"
     )
     magnitude_type: Optional[str] = Field(
         None,
         max_length=10,
-        description="Filter by magnitude type"
+        description="Filter by magnitude type",
+        example="mw"
     )
 
     @field_validator('max_magnitude')
@@ -189,7 +199,8 @@ class DataRequest(BaseModel):
 
     since_datetime: datetime = Field(
         default_factory=lambda: datetime.now().replace(hour=0, minute=0, second=0, microsecond=0) - timedelta(days=1),
-        description="Cannot be a future date"
+        description="Cannot be a future date",
+        example="2025-12-07T00:00:00"
     )
 
     @field_validator('since_datetime')
@@ -231,14 +242,32 @@ class ListEarthquakesRequest(BaseModel):
     
     filters: EarthquakeFilter = Field(
         default_factory=EarthquakeFilter,
-        description="Filter criteria for earthquake records"
+        description="Filter criteria for earthquake records",
+        json_schema_extra={
+            "example": {}
+        }
     )
     pagination: PaginationParams = Field(
         default_factory=PaginationParams,
-        description="Pagination parameters for result set"
+        description="Pagination parameters for result set",
+        json_schema_extra={
+            "example": {
+                "page": 1,
+                "limit": 20
+            }
+        }
     )
 
     model_config = ConfigDict(
         str_strip_whitespace=True,
-        validate_assignment=True
+        validate_assignment=True,
+        json_schema_extra={
+            "example": {
+                "filters": {},
+                "pagination": {
+                    "page": 1,
+                    "limit": 20
+                }
+            }
+        }
     )

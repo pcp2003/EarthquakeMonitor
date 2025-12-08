@@ -1,4 +1,5 @@
 <div class="earthquake-list-container">
+
   <h1>Earthquake Monitor</h1>
 
   <!-- Filtros -->
@@ -75,21 +76,20 @@
         />
       </div>
     </div>
-    <button (click)="clearFilters()" class="btn-clear">Clear Filters</button>
+    <div class="filter-actions">
+      <button (click)="loadEarthquakes()" class="btn-load">Load Earthquakes</button>
+      <button (click)="clearFilters()" class="btn-clear">Clear Filters</button>
+    </div>
   </div>
 
   <!-- Estado de carregamento -->
   @if (loading) {
     <div class="loading">Loading earthquakes...</div>
-  }
-
-  <!-- Mensagem de erro -->
-  @if (error) {
+  } @else if (error) {
+    <!-- Mensagem de erro -->
     <div class="error-message">{{ error }}</div>
-  }
-
-  <!-- Lista de Earthquakes -->
-  @if (earthquakes && !loading) {
+  } @else if (earthquakes) {
+    <!-- Lista de Earthquakes -->
     <div class="results-section">
       <h2>Results ({{ earthquakes.total }} total)</h2>
       <div class="earthquake-count">
@@ -114,7 +114,7 @@
               </tr>
             </thead>
             <tbody>
-              @for (earthquake of earthquakes.earthquakes; track earthquake.usgs_id) {
+              @for (earthquake of earthquakes.earthquakes; track earthquake.id) {
                 <tr class="earthquake-row">
                   <td class="time">{{ earthquake.time }}</td>
                   <td class="magnitude" [class.major]="earthquake.magnitude! >= 6">

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { EarthquakeService } from '../../services/earthquake.service';
 import { EarthquakeListResponse } from '../../api/model/earthquake-list-response';
@@ -10,10 +10,12 @@ import { PaginationParams } from '../../api/model/pagination-params';
   imports: [CommonModule],
   templateUrl: './earthquake-list.html',
   styleUrl: './earthquake-list.css',
+  changeDetection: ChangeDetectionStrategy.Default,
 })
-export class EarthquakeList implements OnInit {
+
+export class EarthquakeList {
   earthquakes: EarthquakeListResponse | null = null;
-  loading = true;
+  loading = false;
   error: string | null = null;
 
   // Default pagination
@@ -25,11 +27,7 @@ export class EarthquakeList implements OnInit {
   // Default empty filters
   filters: EarthquakeFilter = {};
 
-  constructor(private earthquakeService: EarthquakeService) {}
-
-  ngOnInit(): void {
-    this.loadEarthquakes();
-  }
+  constructor(private earthquakeService: EarthquakeService, private cdr: ChangeDetectorRef) {}
 
   /**
    * Load earthquakes with current filters and pagination.
@@ -37,16 +35,22 @@ export class EarthquakeList implements OnInit {
   loadEarthquakes(): void {
     this.loading = true;
     this.error = null;
+    this.cdr.markForCheck();
+
+    console.log('Loading earthquakes with filters:', this.filters, 'and pagination:', this.pagination);
 
     this.earthquakeService.listEarthquakes(this.filters, this.pagination).subscribe({
       next: (data) => {
+        console.log('Successfully loaded earthquakes:', data);
         this.earthquakes = data;
         this.loading = false;
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Error fetching earthquakes:', err);
-        this.error = 'Failed to load earthquakes. Please try again.';
+        this.error = `Failed to load earthquakes: ${err.message || err.status || 'Unknown error'}`;
         this.loading = false;
+        this.cdr.markForCheck();
       },
     });
   }
@@ -68,7 +72,6 @@ export class EarthquakeList implements OnInit {
     const value = (event.target as HTMLInputElement).value;
     this.filters.min_magnitude = value ? parseFloat(value) : undefined;
     this.pagination.page = 1;
-    this.loadEarthquakes();
   }
 
   /**
@@ -78,7 +81,6 @@ export class EarthquakeList implements OnInit {
     const value = (event.target as HTMLInputElement).value;
     this.filters.max_magnitude = value ? parseFloat(value) : undefined;
     this.pagination.page = 1;
-    this.loadEarthquakes();
   }
 
   /**
@@ -88,7 +90,6 @@ export class EarthquakeList implements OnInit {
     const value = (event.target as HTMLInputElement).value;
     this.filters.min_depth = value ? parseFloat(value) : undefined;
     this.pagination.page = 1;
-    this.loadEarthquakes();
   }
 
   /**
@@ -98,7 +99,6 @@ export class EarthquakeList implements OnInit {
     const value = (event.target as HTMLInputElement).value;
     this.filters.max_depth = value ? parseFloat(value) : undefined;
     this.pagination.page = 1;
-    this.loadEarthquakes();
   }
 
   /**
@@ -108,7 +108,6 @@ export class EarthquakeList implements OnInit {
     const value = (event.target as HTMLInputElement).value;
     this.filters.place_contains = value || undefined;
     this.pagination.page = 1;
-    this.loadEarthquakes();
   }
 
   /**
@@ -118,7 +117,6 @@ export class EarthquakeList implements OnInit {
     const value = (event.target as HTMLInputElement).value;
     this.filters.magnitude_type = value || undefined;
     this.pagination.page = 1;
-    this.loadEarthquakes();
   }
 
   /**
@@ -127,6 +125,6 @@ export class EarthquakeList implements OnInit {
   clearFilters(): void {
     this.filters = {};
     this.pagination.page = 1;
-    this.loadEarthquakes();
   }
+
 }
