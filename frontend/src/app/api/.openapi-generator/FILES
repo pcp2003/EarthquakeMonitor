@@ -7,13 +7,13 @@ configuration.ts
 encoder.ts
 git_push.sh
 index.ts
-model/body-list-earthquakes-api-v1-earthquakes-list-get.ts
 model/data-request.ts
 model/data-response.ts
 model/earthquake-filter.ts
 model/earthquake-list-response.ts
 model/earthquake-response.ts
 model/http-validation-error.ts
+model/list-earthquakes-request.ts
 model/models.ts
 model/pagination-params.ts
 model/validation-error-loc-inner.ts

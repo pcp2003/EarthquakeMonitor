@@ -17,8 +17,6 @@ import { CustomHttpParameterCodec }                          from '../encoder';
 import { Observable }                                        from 'rxjs';
 
 // @ts-ignore
-import { BodyListEarthquakesApiV1EarthquakesListGet } from '../model/body-list-earthquakes-api-v1-earthquakes-list-get';
-// @ts-ignore
 import { DataRequest } from '../model/data-request';
 // @ts-ignore
 import { DataResponse } from '../model/data-response';
@@ -28,6 +26,8 @@ import { EarthquakeListResponse } from '../model/earthquake-list-response';
 import { EarthquakeResponse } from '../model/earthquake-response';
 // @ts-ignore
 import { HTTPValidationError } from '../model/http-validation-error';
+// @ts-ignore
+import { ListEarthquakesRequest } from '../model/list-earthquakes-request';
 
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
@@ -147,7 +147,7 @@ export class EarthquakesService {
             }
         }
 
-        let localVarPath = `/api/v1/earthquakes/delete_all`;
+        let localVarPath = `/api/v1/earthquakes/delete-all`;
         return this.httpClient.request<{ [key: string]: any; }>('delete', `${this.configuration.basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
@@ -289,15 +289,18 @@ export class EarthquakesService {
 
     /**
      * List Earthquakes
-     * List earthquakes with optional filtering and pagination.
-     * @param bodyListEarthquakesApiV1EarthquakesListGet 
+     * List earthquakes with optional filtering and pagination.  Request Body: - filters: Object containing filter criteria   - min_magnitude: Minimum earthquake magnitude (0-10)   - max_magnitude: Maximum earthquake magnitude (0-10)   - min_depth: Minimum depth in kilometers   - max_depth: Maximum depth in kilometers   - start_time: Start time filter (ISO 8601 format)   - end_time: End time filter (ISO 8601 format)   - place_contains: Filter by location description   - magnitude_type: Filter by magnitude type (mb, ml, mw, etc) - pagination: Object containing pagination parameters   - page: Page number (starts at 1)   - limit: Records per page (max 1000)  Returns paginated earthquake list with filter applied and navigation flags.
+     * @param listEarthquakesRequest 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public listEarthquakesApiV1EarthquakesListGet(bodyListEarthquakesApiV1EarthquakesListGet?: BodyListEarthquakesApiV1EarthquakesListGet, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<EarthquakeListResponse>;
-    public listEarthquakesApiV1EarthquakesListGet(bodyListEarthquakesApiV1EarthquakesListGet?: BodyListEarthquakesApiV1EarthquakesListGet, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<EarthquakeListResponse>>;
-    public listEarthquakesApiV1EarthquakesListGet(bodyListEarthquakesApiV1EarthquakesListGet?: BodyListEarthquakesApiV1EarthquakesListGet, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<EarthquakeListResponse>>;
-    public listEarthquakesApiV1EarthquakesListGet(bodyListEarthquakesApiV1EarthquakesListGet?: BodyListEarthquakesApiV1EarthquakesListGet, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public listEarthquakesApiV1EarthquakesListPost(listEarthquakesRequest: ListEarthquakesRequest, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<EarthquakeListResponse>;
+    public listEarthquakesApiV1EarthquakesListPost(listEarthquakesRequest: ListEarthquakesRequest, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<EarthquakeListResponse>>;
+    public listEarthquakesApiV1EarthquakesListPost(listEarthquakesRequest: ListEarthquakesRequest, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<EarthquakeListResponse>>;
+    public listEarthquakesApiV1EarthquakesListPost(listEarthquakesRequest: ListEarthquakesRequest, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+        if (listEarthquakesRequest === null || listEarthquakesRequest === undefined) {
+            throw new Error('Required parameter listEarthquakesRequest was null or undefined when calling listEarthquakesApiV1EarthquakesListPost.');
+        }
 
         let localVarHeaders = this.defaultHeaders;
 
@@ -345,10 +348,10 @@ export class EarthquakesService {
         }
 
         let localVarPath = `/api/v1/earthquakes/list`;
-        return this.httpClient.request<EarthquakeListResponse>('get', `${this.configuration.basePath}${localVarPath}`,
+        return this.httpClient.request<EarthquakeListResponse>('post', `${this.configuration.basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
-                body: bodyListEarthquakesApiV1EarthquakesListGet,
+                body: listEarthquakesRequest,
                 responseType: <any>responseType_,
                 withCredentials: this.configuration.withCredentials,
                 headers: localVarHeaders,
@@ -419,7 +422,7 @@ export class EarthquakesService {
             }
         }
 
-        let localVarPath = `/api/v1/earthquakes/ManualSync`;
+        let localVarPath = `/api/v1/earthquakes/manual-sync`;
         return this.httpClient.request<DataResponse>('post', `${this.configuration.basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
