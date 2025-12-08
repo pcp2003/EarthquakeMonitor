@@ -1,6 +1,4 @@
-# Generator configuration files (don't need to be committed)
-.openapi-generator/
-.openapi-generator-ignore
-
-# This file is just for reference and won't be used after generation
-USAGE_EXAMPLE.ts
+wwwroot/*.js
+node_modules
+typings
+dist
