@@ -38,7 +38,7 @@ class EarthquakeBase(BaseModel):
         None, 
         max_length=10,
         description="Magnitude type (mb, ml, mw, etc)"
-    
+    )
     place: Optional[str] = Field(
         None,
         description="Location description"
