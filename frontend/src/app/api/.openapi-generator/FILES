@@ -1,5 +1,4 @@
 .gitignore
-.openapi-generator-ignore
 README.md
 api.module.ts
 api/api.ts
@@ -8,12 +7,15 @@ configuration.ts
 encoder.ts
 git_push.sh
 index.ts
+model/body-list-earthquakes-api-v1-earthquakes-list-get.ts
 model/data-request.ts
 model/data-response.ts
+model/earthquake-filter.ts
 model/earthquake-list-response.ts
 model/earthquake-response.ts
 model/http-validation-error.ts
 model/models.ts
+model/pagination-params.ts
 model/validation-error-loc-inner.ts
 model/validation-error.ts
 param.ts

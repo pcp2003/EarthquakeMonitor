@@ -17,6 +17,8 @@ import { CustomHttpParameterCodec }                          from '../encoder';
 import { Observable }                                        from 'rxjs';
 
 // @ts-ignore
+import { BodyListEarthquakesApiV1EarthquakesListGet } from '../model/body-list-earthquakes-api-v1-earthquakes-list-get';
+// @ts-ignore
 import { DataRequest } from '../model/data-request';
 // @ts-ignore
 import { DataResponse } from '../model/data-response';
@@ -288,65 +290,14 @@ export class EarthquakesService {
     /**
      * List Earthquakes
      * List earthquakes with optional filtering and pagination.
-     * @param minMagnitude 
-     * @param maxMagnitude 
-     * @param minDepth 
-     * @param maxDepth 
-     * @param startTime 
-     * @param endTime 
-     * @param placeContains 
-     * @param magnitudeType 
-     * @param page 
-     * @param limit 
+     * @param bodyListEarthquakesApiV1EarthquakesListGet 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public listEarthquakesApiV1EarthquakesListGet(minMagnitude?: number, maxMagnitude?: number, minDepth?: number, maxDepth?: number, startTime?: string, endTime?: string, placeContains?: string, magnitudeType?: string, page?: number, limit?: number, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<EarthquakeListResponse>;
-    public listEarthquakesApiV1EarthquakesListGet(minMagnitude?: number, maxMagnitude?: number, minDepth?: number, maxDepth?: number, startTime?: string, endTime?: string, placeContains?: string, magnitudeType?: string, page?: number, limit?: number, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<EarthquakeListResponse>>;
-    public listEarthquakesApiV1EarthquakesListGet(minMagnitude?: number, maxMagnitude?: number, minDepth?: number, maxDepth?: number, startTime?: string, endTime?: string, placeContains?: string, magnitudeType?: string, page?: number, limit?: number, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<EarthquakeListResponse>>;
-    public listEarthquakesApiV1EarthquakesListGet(minMagnitude?: number, maxMagnitude?: number, minDepth?: number, maxDepth?: number, startTime?: string, endTime?: string, placeContains?: string, magnitudeType?: string, page?: number, limit?: number, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
-
-        let localVarQueryParameters = new HttpParams({encoder: this.encoder});
-        if (minMagnitude !== undefined && minMagnitude !== null) {
-          localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
-            <any>minMagnitude, 'min_magnitude');
-        }
-        if (maxMagnitude !== undefined && maxMagnitude !== null) {
-          localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
-            <any>maxMagnitude, 'max_magnitude');
-        }
-        if (minDepth !== undefined && minDepth !== null) {
-          localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
-            <any>minDepth, 'min_depth');
-        }
-        if (maxDepth !== undefined && maxDepth !== null) {
-          localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
-            <any>maxDepth, 'max_depth');
-        }
-        if (startTime !== undefined && startTime !== null) {
-          localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
-            <any>startTime, 'start_time');
-        }
-        if (endTime !== undefined && endTime !== null) {
-          localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
-            <any>endTime, 'end_time');
-        }
-        if (placeContains !== undefined && placeContains !== null) {
-          localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
-            <any>placeContains, 'place_contains');
-        }
-        if (magnitudeType !== undefined && magnitudeType !== null) {
-          localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
-            <any>magnitudeType, 'magnitude_type');
-        }
-        if (page !== undefined && page !== null) {
-          localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
-            <any>page, 'page');
-        }
-        if (limit !== undefined && limit !== null) {
-          localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
-            <any>limit, 'limit');
-        }
+    public listEarthquakesApiV1EarthquakesListGet(bodyListEarthquakesApiV1EarthquakesListGet?: BodyListEarthquakesApiV1EarthquakesListGet, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<EarthquakeListResponse>;
+    public listEarthquakesApiV1EarthquakesListGet(bodyListEarthquakesApiV1EarthquakesListGet?: BodyListEarthquakesApiV1EarthquakesListGet, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<EarthquakeListResponse>>;
+    public listEarthquakesApiV1EarthquakesListGet(bodyListEarthquakesApiV1EarthquakesListGet?: BodyListEarthquakesApiV1EarthquakesListGet, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<EarthquakeListResponse>>;
+    public listEarthquakesApiV1EarthquakesListGet(bodyListEarthquakesApiV1EarthquakesListGet?: BodyListEarthquakesApiV1EarthquakesListGet, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
 
         let localVarHeaders = this.defaultHeaders;
 
@@ -373,6 +324,15 @@ export class EarthquakesService {
         }
 
 
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'application/json'
+        ];
+        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType(consumes);
+        if (httpContentTypeSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Content-Type', httpContentTypeSelected);
+        }
+
         let responseType_: 'text' | 'json' | 'blob' = 'json';
         if (localVarHttpHeaderAcceptSelected) {
             if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
@@ -388,7 +348,7 @@ export class EarthquakesService {
         return this.httpClient.request<EarthquakeListResponse>('get', `${this.configuration.basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
-                params: localVarQueryParameters,
+                body: bodyListEarthquakesApiV1EarthquakesListGet,
                 responseType: <any>responseType_,
                 withCredentials: this.configuration.withCredentials,
                 headers: localVarHeaders,
