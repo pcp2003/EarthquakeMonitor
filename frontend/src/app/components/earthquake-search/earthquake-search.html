@@ -1,0 +1,19 @@
+<div class="earthquake-search-container">
+  <h1>Earthquake Monitor</h1>
+
+  <!-- Filter Form -->
+  <app-filter-form
+    [filters]="filters"
+    (filterChange)="onFilterChange($event)"
+    (loadClick)="onLoadClick()"
+    (resetFilters)="onResetFilters()"
+  ></app-filter-form>
+
+  <!-- Results Table -->
+  <app-results-table
+    [earthquakes]="earthquakes"
+    [loading]="loading"
+    [error]="error"
+    (pageChange)="onPageChange($event)"
+  ></app-results-table>
+</div>

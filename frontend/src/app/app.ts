@@ -1,10 +1,9 @@
 import { Component, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-import { EarthquakeList } from './components/earthquake-list/earthquake-list';
+import { EarthquakeSearchComponent } from './components/earthquake-search/earthquake-search';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, EarthquakeList],
+  imports: [EarthquakeSearchComponent],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })

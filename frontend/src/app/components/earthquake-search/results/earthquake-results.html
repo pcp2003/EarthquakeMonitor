@@ -1,0 +1,59 @@
+<!-- Loading state -->
+@if (loading) {
+  <div class="loading">Loading earthquakes...</div>
+} @else if (error) {
+  <!-- Error message -->
+  <div class="error-message">{{ error }}</div>
+} @else if (earthquakes) {
+  <!-- Results section -->
+  <div class="results-section">
+    <h2>Results ({{ earthquakes.total }} total)</h2>
+    <div class="earthquake-count">
+      Showing page {{ earthquakes.page }}
+      ({{ earthquakes.earthquakes.length }} earthquakes per page)
+    </div>
+
+    @if (earthquakes.earthquakes.length === 0) {
+      <p class="no-results">No earthquakes found matching your criteria.</p>
+    } @else {
+      <div class="earthquakes-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Time (UTC)</th>
+              <th>Magnitude</th>
+              <th>Type</th>
+              <th>Depth (km)</th>
+              <th>Latitude</th>
+              <th>Longitude</th>
+              <th>Location</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (earthquake of earthquakes.earthquakes; track earthquake.id) {
+              <tr class="earthquake-row">
+                <td class="time">{{ earthquake.time }}</td>
+                <td class="magnitude" [class.major]="earthquake.magnitude! >= 6">
+                  {{ earthquake.magnitude || 'N/A' }}
+                </td>
+                <td class="magnitude-type">{{ earthquake.magnitude_type || 'N/A' }}</td>
+                <td class="depth">{{ earthquake.depth || 'N/A' }}</td>
+                <td class="latitude">{{ earthquake.latitude }}</td>
+                <td class="longitude">{{ earthquake.longitude }}</td>
+                <td class="location">{{ earthquake.place || 'Unknown' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+    <!-- Pagination Control Component -->
+    <app-pagination-control
+      [currentPage]="earthquakes.page"
+      [hasPrevious]="earthquakes.has_previous"
+      [hasNext]="earthquakes.has_next"
+      (pageChange)="onPageChange($event)"
+    ></app-pagination-control>
+  </div>
+}

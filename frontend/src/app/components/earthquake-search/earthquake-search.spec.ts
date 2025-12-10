@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { EarthquakeList } from './earthquake-list';
+import { EarthquakeSearchComponent } from './earthquake-search';
 
-describe('EarthquakeList', () => {
-  let component: EarthquakeList;
-  let fixture: ComponentFixture<EarthquakeList>;
+describe('EarthquakeSearchComponent', () => {
+  let component: EarthquakeSearchComponent;
+  let fixture: ComponentFixture<EarthquakeSearchComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [EarthquakeList]
+      imports: [EarthquakeSearchComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(EarthquakeList);
+    fixture = TestBed.createComponent(EarthquakeSearchComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });
