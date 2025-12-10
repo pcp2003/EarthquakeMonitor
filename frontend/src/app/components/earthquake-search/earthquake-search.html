@@ -11,9 +11,8 @@
 
   <!-- Results Table -->
   <app-results-table
-    [earthquakes]="earthquakes"
-    [loading]="loading"
-    [error]="error"
+    [earthquakes]="earthquakes()"
+    [error]="error()"
     (pageChange)="onPageChange($event)"
   ></app-results-table>
 </div>

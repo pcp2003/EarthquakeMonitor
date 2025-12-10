@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
+import { Component, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { EarthquakeFilter } from '../../../api/model/earthquake-filter';
 import './earthquake-filters.css';
@@ -12,15 +12,15 @@ import './earthquake-filters.css';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FilterFormComponent {
-  @Input() filters: EarthquakeFilter = {};
-  @Output() filterChange = new EventEmitter<EarthquakeFilter>();
-  @Output() loadClick = new EventEmitter<void>();
-  @Output() resetFilters = new EventEmitter<void>();
+  filters = input<EarthquakeFilter>({});
+  filterChange = output<EarthquakeFilter>();
+  loadClick = output<void>();
+  resetFilters = output<void>();
 
   onMinMagnitudeChange(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
     const updatedFilters = {
-      ...this.filters,
+      ...this.filters(),
       min_magnitude: value ? parseFloat(value) : undefined,
     };
     this.filterChange.emit(updatedFilters);
@@ -29,7 +29,7 @@ export class FilterFormComponent {
   onMaxMagnitudeChange(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
     const updatedFilters = {
-      ...this.filters,
+      ...this.filters(),
       max_magnitude: value ? parseFloat(value) : undefined,
     };
     this.filterChange.emit(updatedFilters);
@@ -38,7 +38,7 @@ export class FilterFormComponent {
   onMinDepthChange(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
     const updatedFilters = {
-      ...this.filters,
+      ...this.filters(),
       min_depth: value ? parseFloat(value) : undefined,
     };
     this.filterChange.emit(updatedFilters);
@@ -47,7 +47,7 @@ export class FilterFormComponent {
   onMaxDepthChange(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
     const updatedFilters = {
-      ...this.filters,
+      ...this.filters(),
       max_depth: value ? parseFloat(value) : undefined,
     };
     this.filterChange.emit(updatedFilters);
@@ -56,7 +56,7 @@ export class FilterFormComponent {
   onLocationChange(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
     const updatedFilters = {
-      ...this.filters,
+      ...this.filters(),
       place_contains: value || undefined,
     };
     this.filterChange.emit(updatedFilters);
@@ -65,7 +65,7 @@ export class FilterFormComponent {
   onMagnitudeTypeChange(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
     const updatedFilters = {
-      ...this.filters,
+      ...this.filters(),
       magnitude_type: value || undefined,
     };
     this.filterChange.emit(updatedFilters);

@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { EarthquakeService } from '../../services/earthquake.service';
 import { EarthquakeListResponse } from '../../api/model/earthquake-list-response';
@@ -26,10 +26,10 @@ import { finalize } from 'rxjs/operators';
   styleUrl: './earthquake-search.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
+
 export class EarthquakeSearchComponent {
-  earthquakes: EarthquakeListResponse | null = null;
-  loading = false;
-  error: string | null = null;
+  earthquakes = signal<EarthquakeListResponse | null>(null);
+  error = signal<string | null>(null);
 
   // Default pagination
   pagination: PaginationParams = {
@@ -42,7 +42,6 @@ export class EarthquakeSearchComponent {
 
   constructor(
     private earthquakeService: EarthquakeService,
-    private cdr: ChangeDetectorRef
   ) {}
 
   /**
@@ -70,7 +69,6 @@ export class EarthquakeSearchComponent {
    */
   onResetFilters(): void {
     this.filters = {};
-    this.cdr.markForCheck();
   }
 
   /**
@@ -89,23 +87,21 @@ export class EarthquakeSearchComponent {
    * Sets loading to false and triggers change detection when complete.
    */
   private loadEarthquakes(): void {
-    this.loading = true;
-    this.error = null;
-    this.cdr.markForCheck();
+    this.error.set(null);
 
     this.earthquakeService.listEarthquakes(this.filters, this.pagination)
+
       .pipe(
         finalize(() => {
-          this.loading = false;
-          this.cdr.markForCheck();
+          // Loading complete
         })
       )
       .subscribe({
         next: (data) => {
-          this.earthquakes = data;
+          this.earthquakes.set(data);
         },
         error: (err) => {
-          this.error = `Failed to load earthquakes: ${err.message || err.status || 'Unknown error'}`;
+          this.error.set(`Failed to load earthquakes: ${err.message || err.status || 'Unknown error'}`);
         },
       });
   }

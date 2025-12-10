@@ -1,7 +1,7 @@
 <div class="pagination">
   <button 
     type="button"
-    [disabled]="!hasPrevious" 
+    [disabled]="!hasPrevious()" 
     (click)="onPreviousPage()"
     class="btn-pagination"
   >
@@ -9,12 +9,12 @@
   </button>
 
   <div class="page-info">
-    Page {{ currentPage }}
+    Page {{ currentPage() }}
   </div>
 
   <button 
     type="button"
-    [disabled]="!hasNext" 
+    [disabled]="!hasNext()" 
     (click)="onNextPage()"
     class="btn-pagination"
   >
