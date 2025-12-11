@@ -7,11 +7,11 @@ Full-stack system for collecting, storing, and visualizing earthquake data from 
 ## 📸 Demo Preview
 
 ### Dashboard & Filtering
-![Earthquake Monitor Dashboard](docs/images/dashboard.png)
+![Earthquake Monitor Dashboard](docs/images/EarthquakeFilterForm.png)
 *Main dashboard with advanced filtering capabilities for magnitude, depth, location, and magnitude type*
 
 ### Results & Pagination
-![Search Results](docs/images/results.png)
+![Search Results](docs/images/EarthquakesResults.png)
 *Paginated earthquake data with detailed information including location, magnitude, depth, and UTC timestamp*
 
 ## Project Specifications
