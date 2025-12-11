@@ -18,20 +18,13 @@ export class EarthquakeService {
 
   /**
    * Gets a paginated list of earthquakes with optional filtering.
-   *
-   * Sends filters and pagination parameters as a JSON request body.
-   * This approach ensures proper OpenAPI schema generation and automatic
-   * TypeScript interface generation from the backend specification.
-   *
-   * @param filters Filter parameters with validation (min/max magnitude, depth, time range, location, magnitude type)
-   * @param pagination Pagination parameters with validation (page >= 1, limit 1-1000)
    * @returns Observable with the paginated response
    */
   listEarthquakes(
     filters?: EarthquakeFilter,
     pagination?: PaginationParams
   ): Observable<EarthquakeListResponse> {
-    // Clean filters - remove undefined values to avoid sending them
+    // Remove undefined values to avoid sending empty fields
     const cleanedFilters = filters ? Object.fromEntries(
       Object.entries(filters).filter(([_, v]) => v !== undefined)
     ) : {};
@@ -41,41 +34,10 @@ export class EarthquakeService {
       pagination: pagination || { page: 1, limit: 50 }
     };
 
-    console.log('Sending earthquake list request:', request);
-
     return this.http.post<EarthquakeListResponse>(
       `${this.apiUrl}/list`,
       request
     );
   }
-
-  /**
-   * Gets the details of a specific earthquake.
-   *
-   * @param id Unique earthquake identifier
-   * @returns Observable with earthquake details
-   */
-  getEarthquakeDetails(id: string): Observable<EarthquakeResponse> {
-    return this.http.get<EarthquakeResponse>(`${this.apiUrl}/${id}/details`);
-  }
-
-  /**
-   * Triggers a manual synchronization of earthquake data from USGS API.
-   *
-   * @param request Optional synchronization request with since_datetime
-   * @returns Observable with synchronization result
-   */
-  manualSync(request?: DataRequest): Observable<DataResponse> {
-    return this.http.post<DataResponse>(`${this.apiUrl}/ManualSync`, request || {});
-  }
-
-  /**
-   * Deletes all earthquake records from the database.
-   * Useful for resetting the dataset during testing or maintenance.
-   *
-   * @returns Observable with deletion result message
-   */
-  deleteAllEarthquakes(): Observable<{ message: string }> {
-    return this.http.delete<{ message: string }>(`${this.apiUrl}/delete_all`);
-  }
+  
 }

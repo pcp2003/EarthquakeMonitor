@@ -9,6 +9,7 @@ from repository.earthquake_repository import EarthquakeRepository
 from services.usgs_data_fetcher import USGSDataFetcher
 from services.usgs_data_formatter import USGSDataFormatter
 from services.sync_service import EarthquakeSyncService
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -55,8 +56,9 @@ class SchedulerService:
     def start(self):
         """
         Start the scheduler and add the sync job.
+        Executes the sync job immediately on startup, then periodically.
         """
-
+        
         self.scheduler.add_job(
             self._run_sync_job,
             trigger=IntervalTrigger(minutes=SYNC_INTERVAL_MINUTES),
@@ -64,7 +66,8 @@ class SchedulerService:
             name=f"Sync earthquakes every {SYNC_INTERVAL_MINUTES} minute(s)",
             replace_existing=True,
             coalesce=True,
-            max_instances=1
+            max_instances=1,
+            next_run_time=datetime.now()
         )
         self.scheduler.start()
         logger.info(f"Scheduler started with {SYNC_INTERVAL_MINUTES}-minute interval sync job.")

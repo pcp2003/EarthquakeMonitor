@@ -28,16 +28,13 @@ import { finalize } from 'rxjs/operators';
 })
 
 export class EarthquakeSearchComponent {
+
   earthquakes = signal<EarthquakeListResponse | null>(null);
   error = signal<string | null>(null);
-
-  // Default pagination
   pagination: PaginationParams = {
     page: 1,
     limit: 20,
   };
-
-  // Default empty filters
   filters: EarthquakeFilter = {};
 
   constructor(
@@ -84,18 +81,11 @@ export class EarthquakeSearchComponent {
 
   /**
    * Loads earthquakes with current filters and pagination.
-   * Sets loading to false and triggers change detection when complete.
    */
   private loadEarthquakes(): void {
     this.error.set(null);
 
     this.earthquakeService.listEarthquakes(this.filters, this.pagination)
-
-      .pipe(
-        finalize(() => {
-          // Loading complete
-        })
-      )
       .subscribe({
         next: (data) => {
           this.earthquakes.set(data);
