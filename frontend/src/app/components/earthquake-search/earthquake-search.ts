@@ -48,7 +48,6 @@ export class EarthquakeSearchComponent {
   onFilterChange(filters: EarthquakeFilter): void {
     this.filters = filters;
     this.pagination.page = 1;
-    this.loadEarthquakes();
   }
 
   /**
